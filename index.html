@@ -1071,6 +1071,24 @@
   </div>
 </div>
 
+<!-- Modal Alterar Senha -->
+<div id="modalAlterarSenha" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>🔑 Alterar Senha</h3><button onclick="closeModal('modalAlterarSenha')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Funcionário</label><input type="text" id="altSenhaFuncNome" readonly></div>
+        <div class="field-group"><label>E-mail</label><input type="text" id="altSenhaFuncEmail" readonly></div>
+        <div class="field-group"><label>Nova Senha</label><input type="text" id="altSenhaNova" placeholder="Deixe em branco para gerar automaticamente"></div>
+        <div style="grid-column: 1/-1; padding: 10px; background: #333; border-radius: 4px; color: #ccc; font-size: 12px;">
+          💡 Deixe em branco e clique em Salvar para gerar uma senha aleatória automaticamente
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalAlterarSenha')">Cancelar</button><button class="btn-primary" onclick="salvarNovasenha()">Salvar Nova Senha</button></div>
+  </div>
+</div>
+
 <!-- Modal Campanha -->
 <div id="modalCampanha" class="modal-overlay">
   <div class="modal">

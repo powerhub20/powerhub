@@ -807,7 +807,10 @@ function renderFuncionarios() {
         <div class="emp-stat"><span class="emp-stat-val">${f.concluidas}</span><span class="emp-stat-lbl">Feitas</span></div>
         <div class="emp-stat"><span class="emp-stat-val">${Math.round(f.concluidas/f.tarefas*100)}%</span><span class="emp-stat-lbl">Taxa</span></div>
       </div>
-      <button class="btn-icon-delete" onclick="if(confirm('Deletar ${f.nome}? Ele perderá acesso ao sistema!')) deleteFuncionario(${f.id})" title="Deletar funcionário"><i class="fas fa-trash"></i></button>
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <button class="btn-primary" onclick="abrirAlterarSenha(${f.id}, '${f.nome}', '${f.email}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-key"></i> Alterar Senha</button>
+        <button class="btn-icon-delete" onclick="if(confirm('Deletar ${f.nome}? Ele perderá acesso ao sistema!')) deleteFuncionario(${f.id})" title="Deletar funcionário"><i class="fas fa-trash"></i></button>
+      </div>
     </div>`;
   }).join('');
 
@@ -1386,6 +1389,44 @@ async function deleteFuncionario(id) {
     renderFuncionarios();
   } else {
     showToast('Erro ao deletar funcionário', 'error');
+  }
+}
+
+function abrirAlterarSenha(id, nome, email) {
+  console.log('🔑 Abrindo alterar senha para:', nome);
+  window.altSenhaFuncId = id;
+  document.getElementById('altSenhaFuncNome').value = nome;
+  document.getElementById('altSenhaFuncEmail').value = email;
+  document.getElementById('altSenhaNova').value = '';
+  openModal('modalAlterarSenha');
+}
+
+async function salvarNovasenha() {
+  const novasenha = val('altSenhaNova').trim();
+  const funcId = window.altSenhaFuncId;
+
+  if (!funcId) return showToast('Erro: funcionário não identificado', 'error');
+
+  // Gerar senha se não informada
+  let senhaFinal = novasenha;
+  if (!senhaFinal) {
+    senhaFinal = gerarSenha(8);
+  }
+
+  console.log('🔄 Alterando senha para:', funcId);
+  console.log('🔑 Nova senha:', senhaFinal);
+
+  const result = await apiRequest('PUT', `/api/funcionarios/${funcId}`, {
+    senha: btoa(senhaFinal)  // Criptografia básica
+  });
+
+  if (result) {
+    closeModal('modalAlterarSenha');
+    showToast(`✅ Senha alterada!\n🔑 Nova senha: ${senhaFinal}`, 'success');
+    await loadDB();
+    renderFuncionarios();
+  } else {
+    showToast('Erro ao alterar senha', 'error');
   }
 }
 async function deleteAviso(id) { await apiRequest('DELETE', `/api/avisos/${id}`); DB.avisos = DB.avisos.filter(a=>a.id!==id); renderAvisos(); showToast('Aviso removido','warning'); }
