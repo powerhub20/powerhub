@@ -1214,6 +1214,22 @@ async function saveFuncionario() {
     return showToast('Senha gerada! Clique em Salvar novamente', 'info');
   }
 
+  // Coletar permissões
+  const permissoes = {
+    dashboard: document.getElementById('permDashboard')?.checked || false,
+    vendas: document.getElementById('permVendas')?.checked || false,
+    financeiro: document.getElementById('permFinanceiro')?.checked || false,
+    estoque: document.getElementById('permEstoque')?.checked || false,
+    compras: document.getElementById('permCompras')?.checked || false,
+    funcionarios: document.getElementById('permFuncionarios')?.checked || false,
+    tarefas: document.getElementById('permTarefas')?.checked || false,
+    avisos: document.getElementById('permAvisos')?.checked || false,
+    metas: document.getElementById('permMetas')?.checked || false,
+    marketing: document.getElementById('permMarketing')?.checked || false,
+    crm: document.getElementById('permCRM')?.checked || false,
+    nuvemshop: document.getElementById('permNuvemshop')?.checked || false
+  };
+
   const funcionario = {
     nome,
     cargo,
@@ -1223,12 +1239,13 @@ async function saveFuncionario() {
     data_contratacao: contratacao,
     salario,
     status,
-    senha: btoa(senha) // Criptografia básica (Base64)
+    senha: btoa(senha),
+    permissoes: JSON.stringify(permissoes)
   };
 
   const result = await apiRequest('POST', '/api/funcionarios', funcionario);
   if (result) {
-    console.log('✅ Funcionário cadastrado com login:', email);
+    console.log('✅ Funcionário cadastrado com permissões:', permissoes);
     DB.funcionarios.push({
       id: result.id,
       nome,
@@ -1239,11 +1256,18 @@ async function saveFuncionario() {
       contratacao,
       salario,
       status,
+      permissoes,
       tarefas: 0,
       concluidas: 0
     });
     closeModal('modalFuncionario');
     document.getElementById('funcSenha').value = '';
+
+    // Resetar checkboxes
+    document.querySelectorAll('#modalFuncionario input[type="checkbox"]').forEach(cb => {
+      if (cb.id.startsWith('perm')) cb.checked = (cb.id === 'permDashboard' || cb.id === 'permVendas' || cb.id === 'permTarefas');
+    });
+
     renderFuncionarios();
     showToast(`✅ Funcionário criado!\n📧 Email: ${email}\n🔑 Senha: ${senha}`, 'success');
   }

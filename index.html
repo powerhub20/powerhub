@@ -1023,6 +1023,49 @@
         <div class="field-group"><label>Salário (R$)</label><input type="number" id="funcSalario"></div>
         <div class="field-group"><label>Status</label><select id="funcStatus"><option>Ativo</option><option>Férias</option><option>Afastado</option></select></div>
       </div>
+
+      <!-- PERMISSÕES -->
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #444;">
+        <h4 style="margin: 0 0 10px 0; color: #fff;">📋 Permissões de Acesso</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permDashboard" checked> Dashboard
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permVendas" checked> Vendas
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permFinanceiro"> Financeiro
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permEstoque"> Estoque
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permCompras"> Compras
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permFuncionarios"> Funcionários
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permTarefas" checked> Tarefas
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permAvisos"> Avisos
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permMetas"> Metas
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permMarketing"> Marketing
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permCRM"> CRM
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; color: #ccc; cursor: pointer;">
+            <input type="checkbox" id="permNuvemshop"> Nuvemshop
+          </label>
+        </div>
+      </div>
     </div>
     <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalFuncionario')">Cancelar</button><button class="btn-primary" onclick="saveFuncionario()">Salvar</button></div>
   </div>
