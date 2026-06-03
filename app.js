@@ -1206,12 +1206,11 @@ async function saveFuncionario() {
   if (!nome) return showToast('Informe o nome', 'error');
   if (!email) return showToast('Informe o e-mail', 'error');
 
-  // Gerar senha automaticamente
+  // Gerar senha automaticamente se não existir
   let senha = val('funcSenha');
   if (!senha) {
     senha = gerarSenha(8);
     document.getElementById('funcSenha').value = senha;
-    return showToast('Senha gerada! Clique em Salvar novamente', 'info');
   }
 
   // Coletar permissões
@@ -1230,6 +1229,10 @@ async function saveFuncionario() {
     nuvemshop: document.getElementById('permNuvemshop')?.checked || false
   };
 
+  console.log('📝 Salvando funcionário:', nome, email);
+  console.log('🔑 Senha:', senha);
+  console.log('📋 Permissões:', permissoes);
+
   const funcionario = {
     nome,
     cargo,
@@ -1244,8 +1247,10 @@ async function saveFuncionario() {
   };
 
   const result = await apiRequest('POST', '/api/funcionarios', funcionario);
-  if (result) {
-    console.log('✅ Funcionário cadastrado com permissões:', permissoes);
+  console.log('✅ Resultado POST:', result);
+
+  if (result && result.id) {
+    console.log('✅ Funcionário salvo com ID:', result.id);
     DB.funcionarios.push({
       id: result.id,
       nome,
@@ -1260,16 +1265,26 @@ async function saveFuncionario() {
       tarefas: 0,
       concluidas: 0
     });
-    closeModal('modalFuncionario');
+
+    // Limpar formulário
+    document.getElementById('funcNome').value = '';
+    document.getElementById('funcCargo').value = '';
+    document.getElementById('funcTel').value = '';
+    document.getElementById('funcEmail').value = '';
     document.getElementById('funcSenha').value = '';
+    document.getElementById('funcData').value = '';
+    document.getElementById('funcSalario').value = '';
 
     // Resetar checkboxes
     document.querySelectorAll('#modalFuncionario input[type="checkbox"]').forEach(cb => {
       if (cb.id.startsWith('perm')) cb.checked = (cb.id === 'permDashboard' || cb.id === 'permVendas' || cb.id === 'permTarefas');
     });
 
+    closeModal('modalFuncionario');
     renderFuncionarios();
     showToast(`✅ Funcionário criado!\n📧 Email: ${email}\n🔑 Senha: ${senha}`, 'success');
+  } else {
+    showToast('Erro ao salvar funcionário', 'error');
   }
 }
 
