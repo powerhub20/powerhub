@@ -867,6 +867,13 @@ function updateDashChartVendasMes(anoAtual, dadosAno, dadosAnoAnt) {
   const ctx = document.getElementById('chartVendasMes');
   if (!ctx) return;
 
+  // Atualizar badge do ano
+  const card = ctx.closest('.chart-card');
+  if (card) {
+    const badgeEl = card.querySelector('.chart-badge');
+    if (badgeEl) badgeEl.textContent = String(anoAtual);
+  }
+
   charts['vendas'] = new Chart(ctx, {
     type: 'bar',
     data: {
