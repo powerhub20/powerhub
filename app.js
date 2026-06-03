@@ -807,6 +807,7 @@ function renderFuncionarios() {
         <div class="emp-stat"><span class="emp-stat-val">${f.concluidas}</span><span class="emp-stat-lbl">Feitas</span></div>
         <div class="emp-stat"><span class="emp-stat-val">${Math.round(f.concluidas/f.tarefas*100)}%</span><span class="emp-stat-lbl">Taxa</span></div>
       </div>
+      <button class="btn-icon-delete" onclick="if(confirm('Deletar ${f.nome}? Ele perderá acesso ao sistema!')) deleteFuncionario(${f.id})" title="Deletar funcionário"><i class="fas fa-trash"></i></button>
     </div>`;
   }).join('');
 
@@ -1201,16 +1202,60 @@ async function saveMeta() {
 
 async function saveFuncionario() {
   const nome=val('funcNome'), cargo=val('funcCargo'), depto=val('funcDepto'), tel=val('funcTel'), email=val('funcEmail'), contratacao=val('funcData'), salario=parseFloat(val('funcSalario')||0), status=val('funcStatus');
-  if (!nome) return showToast('Informe o nome', 'error');
 
-  const funcionario = { nome, cargo, departamento: depto, telefone: tel, email, data_contratacao: contratacao, salario, status };
+  if (!nome) return showToast('Informe o nome', 'error');
+  if (!email) return showToast('Informe o e-mail', 'error');
+
+  // Gerar senha automaticamente
+  let senha = val('funcSenha');
+  if (!senha) {
+    senha = gerarSenha(8);
+    document.getElementById('funcSenha').value = senha;
+    return showToast('Senha gerada! Clique em Salvar novamente', 'info');
+  }
+
+  const funcionario = {
+    nome,
+    cargo,
+    departamento: depto,
+    telefone: tel,
+    email,
+    data_contratacao: contratacao,
+    salario,
+    status,
+    senha: btoa(senha) // Criptografia básica (Base64)
+  };
+
   const result = await apiRequest('POST', '/api/funcionarios', funcionario);
   if (result) {
-    DB.funcionarios.push({ id: result.id, nome, cargo, depto, tel, email, contratacao, salario, status, tarefas:0, concluidas:0 });
+    console.log('✅ Funcionário cadastrado com login:', email);
+    DB.funcionarios.push({
+      id: result.id,
+      nome,
+      cargo,
+      depto,
+      tel,
+      email,
+      contratacao,
+      salario,
+      status,
+      tarefas: 0,
+      concluidas: 0
+    });
     closeModal('modalFuncionario');
+    document.getElementById('funcSenha').value = '';
     renderFuncionarios();
-    showToast('Funcionário cadastrado!', 'success');
+    showToast(`✅ Funcionário criado!\n📧 Email: ${email}\n🔑 Senha: ${senha}`, 'success');
   }
+}
+
+function gerarSenha(length) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';
+  let senha = '';
+  for (let i = 0; i < length; i++) {
+    senha += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return senha;
 }
 
 async function saveCampanha() {
@@ -1289,6 +1334,19 @@ async function deleteTarefa(id) {
     renderKanban();
   } else {
     showToast('Erro ao deletar tarefa', 'error');
+  }
+}
+
+async function deleteFuncionario(id) {
+  console.log('🗑️ Deletando funcionário:', id);
+  const result = await apiRequest('DELETE', `/api/funcionarios/${id}`);
+
+  if (result && result.ok) {
+    showToast('Funcionário removido! Acesso revogado!', 'warning');
+    await loadDB();
+    renderFuncionarios();
+  } else {
+    showToast('Erro ao deletar funcionário', 'error');
   }
 }
 async function deleteAviso(id) { await apiRequest('DELETE', `/api/avisos/${id}`); DB.avisos = DB.avisos.filter(a=>a.id!==id); renderAvisos(); showToast('Aviso removido','warning'); }
