@@ -5,13 +5,26 @@ const cors    = require('cors');
 const path    = require('path');
 const XLSX    = require('xlsx');
 const fs      = require('fs');
-const { db, initDatabase, getAll, getById, insert, update, remove } = require('./db');
+
+// Usar PostgreSQL se DATABASE_URL existir (Railway), senão SQLite (desenvolvimento)
+const dbModule = process.env.DATABASE_URL ? require('./db-postgres') : require('./db');
+const { initDatabase, getAll, getById, insert, update, remove } = dbModule;
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// Inicializar banco de dados SQLite
-initDatabase();
+console.log(`📦 Banco de dados: ${process.env.DATABASE_URL ? 'PostgreSQL (Railway)' : 'SQLite (Local)'}`);
+
+// Inicializar banco de dados
+if (process.env.DATABASE_URL) {
+  // PostgreSQL — inicializa async
+  dbModule.initDatabase().then(() => {
+    console.log('✅ PostgreSQL inicializado');
+  });
+} else {
+  // SQLite — inicializa sync
+  initDatabase();
+}
 
 app.use(cors());
 app.use(express.json());
