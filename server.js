@@ -14,15 +14,20 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 console.log(`📦 Banco de dados: ${process.env.DATABASE_URL ? 'PostgreSQL (Railway)' : 'SQLite (Local)'}`);
+console.log(`DATABASE_URL definida? ${!!process.env.DATABASE_URL}`);
 
 // Inicializar banco de dados
 if (process.env.DATABASE_URL) {
   // PostgreSQL — inicializa async
+  console.log('🔌 Conectando ao PostgreSQL...');
   dbModule.initDatabase().then(() => {
-    console.log('✅ PostgreSQL inicializado');
+    console.log('✅ PostgreSQL inicializado com sucesso!');
+  }).catch(err => {
+    console.error('❌ ERRO ao inicializar PostgreSQL:', err.message);
   });
 } else {
   // SQLite — inicializa sync
+  console.log('💾 Usando SQLite localmente');
   initDatabase();
 }
 
