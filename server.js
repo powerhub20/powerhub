@@ -740,6 +740,7 @@ app.get('/api/vendas/nuvemshop', async (req, res) => {
 // ──────────────────────────────────────────────
 app.get('/api/vendas/categorias', async (req, res) => {
   if (!NS_STORE_ID || !NS_TOKEN) {
+    console.log('⚠️ Nuvemshop não configurada - Store:', NS_STORE_ID, 'Token:', NS_TOKEN ? 'sim' : 'não');
     return res.status(401).json({ error: 'Nuvemshop não configurada' });
   }
 
@@ -750,8 +751,9 @@ app.get('/api/vendas/categorias', async (req, res) => {
       'Content-Type': 'application/json',
     };
 
-    // Buscar pedidos pagos
-    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=200&payment_status=paid&fields=id,products,created_at`;
+    // Buscar pedidos pagos com detalhes de produtos
+    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=500&payment_status=paid&fields=id,products`;
+    console.log('📡 Buscando pedidos em:', urlOrders);
     const rOrders = await fetch(urlOrders, { headers });
 
     if (!rOrders.ok) {
@@ -809,12 +811,22 @@ app.get('/api/vendas/categorias', async (req, res) => {
     });
 
     // Converter para array e ordenar
-    const resultado = Object.entries(categoriaVendas)
+    let resultado = Object.entries(categoriaVendas)
       .map(([nome, valor]) => ({ nome, valor }))
       .sort((a, b) => b.valor - a.valor)
       .slice(0, 10);  // Top 10 categorias
 
-    console.log('✅ Categorias carregadas:', resultado);
+    // Se não houver categorias, retornar fallback
+    if (resultado.length === 0) {
+      resultado = [
+        { nome: 'Suplementos', valor: 0 },
+        { nome: 'Roupas', valor: 0 },
+        { nome: 'Acessórios', valor: 0 },
+        { nome: 'Equipamentos', valor: 0 }
+      ];
+    }
+
+    console.log('✅ Categorias carregadas:', resultado.length, 'categorias');
     res.json({ categorias: resultado });
   } catch (e) {
     console.error('Erro ao buscar categorias:', e);
