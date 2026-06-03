@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "powerhub",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-s", "."],
+      "port": 5500,
+      "autoPort": true
+    }
+  ]
+}

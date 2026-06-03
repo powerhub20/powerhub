@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Hub — Power Ropes</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-bg"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+      <h1>POWER ROPES</h1>
+      <p>Power Ropes — Gestão Empresarial</p>
+    </div>
+    <form id="loginForm">
+      <div class="field-group">
+        <label>E-mail</label>
+        <div class="input-icon"><i class="fas fa-envelope"></i><input type="email" id="loginEmail" placeholder="seu@email.com" value="admin@powerropes.com"></div>
+      </div>
+      <div class="field-group">
+        <label>Senha</label>
+        <div class="input-icon"><i class="fas fa-lock"></i><input type="password" id="loginPass" placeholder="••••••••" value="123456"></div>
+      </div>
+      <div class="login-role-select">
+        <label>Perfil de acesso</label>
+        <select id="loginRole">
+          <option value="admin">Administrador</option>
+          <option value="gestor">Gestor</option>
+          <option value="financeiro">Financeiro</option>
+          <option value="marketing">Marketing</option>
+          <option value="estoque">Estoque</option>
+          <option value="funcionario">Funcionário</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-login">Entrar no Sistema <i class="fas fa-arrow-right"></i></button>
+    </form>
+  </div>
+</div>
+
+<!-- APP WRAPPER -->
+<div id="app" class="app-wrapper" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon-sm"><i class="fas fa-bolt"></i></div>
+        <span class="logo-text">POWER ROPES</span>
+      </div>
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <div class="user-info">
+      <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+      <div class="user-details">
+        <span class="user-name" id="sidebarUserName">Administrador</span>
+        <span class="user-role" id="sidebarUserRole">admin</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <div class="nav-section-label">Principal</div>
+      <a href="#" class="nav-item active" data-module="dashboard" onclick="showModule('dashboard',this)">
+        <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-module="vendas" onclick="showModule('vendas',this)">
+        <i class="fas fa-chart-line"></i><span>Vendas</span>
+        <span class="badge gold">REAL</span>
+      </a>
+      <a href="#" class="nav-item" data-module="financeiro" data-roles="admin,gestor,financeiro" onclick="showModule('financeiro',this)">
+        <i class="fas fa-dollar-sign"></i><span>Financeiro</span>
+      </a>
+      <a href="#" class="nav-item" data-module="estoque" data-roles="admin,gestor,estoque" onclick="showModule('estoque',this)">
+        <i class="fas fa-boxes-stacked"></i><span>Estoque</span>
+      </a>
+      <a href="#" class="nav-item" data-module="compras" data-roles="admin,gestor,estoque" onclick="showModule('compras',this)">
+        <i class="fas fa-cart-shopping"></i><span>Compras</span>
+      </a>
+      <div class="nav-section-label">Equipe</div>
+      <a href="#" class="nav-item" data-module="funcionarios" data-roles="admin,gestor" onclick="showModule('funcionarios',this)">
+        <i class="fas fa-users"></i><span>Funcionários</span>
+      </a>
+      <a href="#" class="nav-item" data-module="tarefas" onclick="showModule('tarefas',this)">
+        <i class="fas fa-check-square"></i><span>Tarefas</span>
+      </a>
+      <a href="#" class="nav-item" data-module="avisos" onclick="showModule('avisos',this)">
+        <i class="fas fa-bell"></i><span>Avisos</span>
+        <span class="badge" id="avisosBadge">3</span>
+      </a>
+      <div class="nav-section-label">Negócios</div>
+      <a href="#" class="nav-item" data-module="metas" onclick="showModule('metas',this)">
+        <i class="fas fa-bullseye"></i><span>Metas</span>
+      </a>
+      <a href="#" class="nav-item" data-module="marketing" data-roles="admin,gestor,marketing" onclick="showModule('marketing',this)">
+        <i class="fas fa-chart-line"></i><span>Marketing</span>
+      </a>
+      <a href="#" class="nav-item" data-module="crm" data-roles="admin,gestor,marketing" onclick="showModule('crm',this)">
+        <i class="fas fa-handshake"></i><span>CRM</span>
+      </a>
+      <div class="nav-section-label">Integrações</div>
+      <a href="#" class="nav-item" data-module="nuvemshop" onclick="showModule('nuvemshop',this)">
+        <i class="fas fa-store"></i><span>Nuvemshop</span>
+        <span class="badge" id="nsBadge" style="display:none;background:#6a3fd4">API</span>
+      </a>
+      <a href="#" class="nav-item" data-module="captacao" onclick="showModule('captacao',this)">
+        <i class="fas fa-map-location-dot"></i><span>Captação Lojas</span>
+        <span class="badge" style="background:#e34c26">NEW</span>
+      </a>
+      <div class="nav-section-label">Análise</div>
+      <a href="#" class="nav-item" data-module="relatorios" data-roles="admin,gestor,financeiro" onclick="showModule('relatorios',this)">
+        <i class="fas fa-file-chart-column"></i><span>Relatórios</span>
+      </a>
+      <a href="#" class="nav-item" data-module="inteligencia" onclick="showModule('inteligencia',this)">
+        <i class="fas fa-brain"></i><span>Inteligência IA</span>
+        <span class="badge gold">IA</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+      <button class="btn-logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i><span>Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar no sistema...">
+        </div>
+        <div class="notif-btn" onclick="toggleNotifPanel()">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot" id="notifDot"></span>
+        </div>
+        <div class="user-chip">
+          <i class="fas fa-user-circle"></i>
+          <span id="topbarUser">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- NOTIFICATION PANEL -->
+    <div id="notifPanel" class="notif-panel hidden">
+      <div class="notif-header"><h3>Notificações</h3><button onclick="clearNotifs()">Limpar</button></div>
+      <div id="notifList" class="notif-list"></div>
+    </div>
+
+    <!-- MODULES -->
+    <div class="module-container">
+
+      <!-- ==================== DASHBOARD ==================== -->
+      <section id="mod-dashboard" class="module active">
+        <div class="module-header">
+          <h2><i class="fas fa-chart-pie"></i> Dashboard Executivo</h2>
+          <div class="header-actions">
+            <span class="live-badge"><i class="fas fa-circle"></i> Ao vivo</span>
+            <select onchange="filterDashboard(this.value)" class="select-sm">
+              <option value="hoje">Hoje</option>
+              <option value="semana">Esta semana</option>
+              <option value="mes" selected>Este mês</option>
+              <option value="ano">Este ano</option>
+              <option value="todo">Todo período</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPI CARDS ROW 1 -->
+        <div class="kpi-grid">
+          <div class="kpi-card green">
+            <div class="kpi-icon"><i class="fas fa-coins"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label" id="kpi-dia-label">Faturamento do Dia</span>
+              <span class="kpi-value" id="kpi-dia-val">—</span>
+              <span class="kpi-trend up" id="kpi-dia-trend"><i class="fas fa-calendar"></i> dados da planilha</span>
+            </div>
+          </div>
+          <div class="kpi-card gold">
+            <div class="kpi-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label" id="kpi-mes-label">Faturamento do Mês</span>
+              <span class="kpi-value" id="kpi-mes-val">—</span>
+              <span class="kpi-trend up" id="kpi-mes-trend"><i class="fas fa-arrow-up"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label" id="kpi-anual-label">Faturamento Anual</span>
+              <span class="kpi-value" id="kpi-anual-val">—</span>
+              <span class="kpi-trend up" id="kpi-anual-trend"><i class="fas fa-arrow-up"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="kpi-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label" id="kpi-invest-label">Invest. Anúncios (Ano)</span>
+              <span class="kpi-value" id="kpi-invest-val">—</span>
+              <span class="kpi-trend neutral" id="kpi-invest-trend"><i class="fas fa-chart-bar"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label" id="kpi-roi-label">ROI Geral (Mês)</span>
+              <span class="kpi-value" id="kpi-roi-val">—</span>
+              <span class="kpi-trend up" id="kpi-roi-trend"><i class="fas fa-arrow-up"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card gold">
+            <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Melhor Mês do Ano</span>
+              <span class="kpi-value" id="kpi-melhor-val">—</span>
+              <span class="kpi-trend up" id="kpi-melhor-trend"><i class="fas fa-trophy"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-icon"><i class="fas fa-triangle-exclamation"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Estoque Baixo</span>
+              <span class="kpi-value">7 produtos</span>
+              <span class="kpi-trend down"><i class="fas fa-exclamation"></i> Atenção</span>
+            </div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-icon"><i class="fas fa-list-check"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Tarefas Atrasadas</span>
+              <span class="kpi-value">4</span>
+              <span class="kpi-trend down"><i class="fas fa-arrow-up"></i> +2 esta semana</span>
+            </div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-icon"><i class="fas fa-wifi"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Funcionários Online</span>
+              <span class="kpi-value">8</span>
+              <span class="kpi-trend up"><i class="fas fa-circle"></i> ativos agora</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW 1 -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><h3>Vendas por Mês</h3><span class="chart-badge">2025</span></div>
+            <canvas id="chartVendasMes" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>Vendas por Categoria</h3></div>
+            <canvas id="chartCategoria" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW 2 -->
+        <div class="charts-grid-3">
+          <div class="chart-card">
+            <div class="chart-header"><h3>Vendas por Canal</h3></div>
+            <canvas id="chartCanal" height="220"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>ROI por Canal</h3></div>
+            <canvas id="chartROICanal" height="220"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>Meta Ads vs Google Ads</h3></div>
+            <canvas id="chartAds" height="220"></canvas>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW 3 -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><h3>Fluxo de Caixa</h3></div>
+            <canvas id="chartFluxo" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>Crescimento da Empresa</h3></div>
+            <canvas id="chartCrescimento" height="200"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VENDAS ==================== -->
+      <section id="mod-vendas" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-chart-line"></i> Painel de Vendas — Dados Reais</h2>
+          <div class="header-actions">
+            <span class="live-badge" style="background:rgba(201,162,39,0.12);color:var(--gold);border-color:rgba(201,162,39,0.3)">
+              <i class="fas fa-table"></i> Dados da Planilha VENDAS.xlsx
+            </span>
+            <select id="vendas-ano-filtro" class="select-sm" onchange="renderVendasAno(this.value)">
+              <option value="todos">Todos os Anos</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPIs REAIS -->
+        <div class="kpi-grid kpi-4" id="vendasKPIs"></div>
+
+        <!-- GRÁFICO PRINCIPAL: Faturamento por Mês (ano selecionado) -->
+        <div class="charts-grid-2">
+          <div class="chart-card" style="grid-column:1/-1">
+            <div class="chart-header">
+              <h3 id="chartVendasMesTitle">Faturamento Mensal</h3>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="chart-badge" id="chartVendasMesBadge">Todos</span>
+              </div>
+            </div>
+            <canvas id="chartVendasMesPrincipal" height="100"></canvas>
+          </div>
+        </div>
+
+        <!-- LINHA DO TEMPO 5 ANOS + ROI -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Histórico Completo — Crescimento</h3>
+              <span class="chart-badge" id="chart5AnosBadge">2021–2026</span>
+            </div>
+            <canvas id="chart5Anos" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Total Anual por Ano</h3>
+              <span class="chart-badge">Comparativo</span>
+            </div>
+            <canvas id="chartAnual" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- ROI + INVESTIMENTO -->
+        <div class="charts-grid-3">
+          <div class="chart-card">
+            <div class="chart-header"><h3>ROI Mensal 2024</h3><span class="chart-badge">x vezes</span></div>
+            <canvas id="chartROI2024" height="220"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>ROI Mensal 2025</h3><span class="chart-badge">x vezes</span></div>
+            <canvas id="chartROI2025" height="220"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>Crescimento de Vendas (% Jan-Mai vs Ano Anterior)</h3><span class="chart-badge">%</span></div>
+            <canvas id="chartGrowthComparison" height="220"></canvas>
+          </div>
+        </div>
+
+        <!-- FACEBOOK VS GOOGLE + 2026 -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><h3>Facebook Ads vs Google Ads — 2024</h3></div>
+            <canvas id="chartFbGoogle" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>2026 — Vendas (Jan–Mai)</h3><span class="chart-badge">Em curso</span></div>
+            <canvas id="chart2026" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- TABELA COMPARATIVA ANUAL -->
+        <div class="table-card" style="margin-top:8px">
+          <div class="table-actions">
+            <h3 style="font-size:14px;font-weight:700">Resumo Histórico por Ano</h3>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="tblVendasAnual">
+              <thead>
+                <tr>
+                  <th>Ano</th>
+                  <th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th><th>Mai</th><th>Jun</th>
+                  <th>Jul</th><th>Ago</th><th>Set</th><th>Out</th><th>Nov</th><th>Dez</th>
+                  <th>Total</th><th>Melhor Mês</th><th>Vs Ano Ant.</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyVendasAnual"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DETALHES DO ANO SELECIONADO -->
+        <div id="vendasAnoDetalhe" style="margin-top:16px"></div>
+      </section>
+
+      <!-- ==================== FINANCEIRO ==================== -->
+      <section id="mod-financeiro" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-dollar-sign"></i> Módulo Financeiro</h2>
+          <div class="header-actions">
+            <select id="filtroFinanceiro" onchange="filterFinanceiro(this.value)" class="select-sm">
+              <option value="dia">Dia</option>
+              <option value="semana">Semana</option>
+              <option value="mes" selected>Mês</option>
+              <option value="ano">Ano</option>
+            </select>
+            <button class="btn-primary" onclick="openModal('modalFinanceiro')"><i class="fas fa-plus"></i> Nova Transação</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid kpi-4">
+          <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-arrow-up"></i></div><div class="kpi-info"><span class="kpi-label">Lucro Bruto</span><span class="kpi-value">R$ 54.200</span></div></div>
+          <div class="kpi-card gold"><div class="kpi-icon"><i class="fas fa-chart-line"></i></div><div class="kpi-info"><span class="kpi-label">Lucro Líquido</span><span class="kpi-value">R$ 38.740</span></div></div>
+          <div class="kpi-card blue"><div class="kpi-icon"><i class="fas fa-percent"></i></div><div class="kpi-info"><span class="kpi-label">Margem</span><span class="kpi-value">44.3%</span></div></div>
+          <div class="kpi-card purple"><div class="kpi-icon"><i class="fas fa-chart-bar"></i></div><div class="kpi-info"><span class="kpi-label">ROI</span><span class="kpi-value">612%</span></div></div>
+        </div>
+
+        <div class="tabs-bar">
+          <button class="tab active" onclick="switchTab('fin','receitas',this)">Receitas</button>
+          <button class="tab" onclick="switchTab('fin','despesas',this)">Despesas</button>
+          <button class="tab" onclick="switchTab('fin','pagar',this)">Contas a Pagar</button>
+          <button class="tab" onclick="switchTab('fin','receber',this)">Contas a Receber</button>
+          <button class="tab" onclick="switchTab('fin','investimentos',this)">Investimentos</button>
+          <button class="tab" onclick="switchTab('fin','impostos',this)">Impostos</button>
+        </div>
+
+        <div id="fin-receitas" class="tab-content active">
+          <div class="charts-grid-2" style="margin-bottom:1.5rem">
+            <div class="chart-card"><div class="chart-header"><h3>Receitas x Despesas</h3></div><canvas id="chartRecDesp" height="200"></canvas></div>
+            <div class="chart-card"><div class="chart-header"><h3>Fluxo Mensal</h3></div><canvas id="chartFluxoMes" height="200"></canvas></div>
+          </div>
+          <div class="table-card">
+            <div class="table-actions"><input type="text" placeholder="Buscar receita..." class="search-input"><button class="btn-primary btn-sm" onclick="openModal('modalFinanceiro')"><i class="fas fa-plus"></i> Adicionar</button></div>
+            <div class="table-wrap"><table class="data-table" id="tblReceitas">
+              <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="tbodyReceitas"></tbody>
+            </table></div>
+          </div>
+        </div>
+        <div id="fin-despesas" class="tab-content">
+          <div class="table-card">
+            <div class="table-actions"><input type="text" placeholder="Buscar despesa..." class="search-input"><button class="btn-primary btn-sm" onclick="openModal('modalFinanceiro')"><i class="fas fa-plus"></i> Adicionar</button></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyDespesas"></tbody></table></div>
+          </div>
+        </div>
+        <div id="fin-pagar" class="tab-content"><div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Vencimento</th><th>Fornecedor</th><th>Descrição</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyPagar"></tbody></table></div></div></div>
+        <div id="fin-receber" class="tab-content"><div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Vencimento</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyReceber"></tbody></table></div></div></div>
+        <div id="fin-investimentos" class="tab-content"><div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Retorno</th><th>Ações</th></tr></thead><tbody id="tbodyInvest"></tbody></table></div></div></div>
+        <div id="fin-impostos" class="tab-content"><div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Mês</th><th>Tipo</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyImpostos"></tbody></table></div></div></div>
+      </section>
+
+      <!-- ==================== ESTOQUE ==================== -->
+      <section id="mod-estoque" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-boxes-stacked"></i> Módulo de Estoque</h2>
+          <div class="header-actions">
+            <button id="btnSyncNS" class="btn-outline" onclick="syncEstoqueFromNuvemshop(true)" style="border-color:#6a3fd4;color:#a78bfa" title="Sincronizar produtos da Nuvemshop">
+              <i class="fas fa-store"></i> Sync Nuvemshop
+            </button>
+            <button class="btn-primary" onclick="openModal('modalProduto')"><i class="fas fa-plus"></i> Novo Produto</button>
+          </div>
+        </div>
+
+        <div id="stockAlerts" class="stock-alerts"></div>
+
+        <div class="kpi-grid kpi-4">
+          <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-cubes"></i></div><div class="kpi-info"><span class="kpi-label">Total de Produtos</span><span class="kpi-value" id="totalProdutos">0</span></div></div>
+          <div class="kpi-card gold"><div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div><div class="kpi-info"><span class="kpi-label">Valor em Estoque</span><span class="kpi-value" id="valorEstoque">R$ 0</span></div></div>
+          <div class="kpi-card orange"><div class="kpi-icon"><i class="fas fa-triangle-exclamation"></i></div><div class="kpi-info"><span class="kpi-label">Estoque Baixo</span><span class="kpi-value" id="estoqueBaixo">0</span></div></div>
+          <div class="kpi-card red"><div class="kpi-icon"><i class="fas fa-ban"></i></div><div class="kpi-info"><span class="kpi-label">Sem Estoque</span><span class="kpi-value" id="semEstoque">0</span></div></div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-actions">
+            <input type="text" placeholder="Buscar produto..." class="search-input" oninput="filterTable('tblEstoque',this.value)">
+            <select class="select-sm" onchange="filterByCategory(this.value)">
+              <option value="">Todas categorias</option>
+              <option>Suplementos</option><option>Roupas</option><option>Acessórios</option><option>Equipamentos</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="tblEstoque">
+              <thead><tr><th>SKU</th><th>Nome</th><th>Categoria</th><th>Fornecedor</th><th>Qtd</th><th>Custo</th><th>Venda</th><th>Margem</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="tbodyEstoque"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== COMPRAS ==================== -->
+      <section id="mod-compras" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-cart-shopping"></i> Módulo de Compras</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalCompra')"><i class="fas fa-plus"></i> Nova Compra</button>
+          </div>
+        </div>
+        <div class="tabs-bar">
+          <button class="tab active" onclick="switchTab('comp','compras',this)">Compras</button>
+          <button class="tab" onclick="switchTab('comp','fornecedores',this)">Fornecedores</button>
+          <button class="tab" onclick="switchTab('comp','entradas',this)">Entradas</button>
+        </div>
+        <div id="comp-compras" class="tab-content active">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Fornecedor</th><th>Produtos</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyCompras"></tbody></table></div></div>
+        </div>
+        <div id="comp-fornecedores" class="tab-content">
+          <div class="table-card">
+            <div class="table-actions"><button class="btn-primary btn-sm" onclick="openModal('modalFornecedor')"><i class="fas fa-plus"></i> Novo Fornecedor</button></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>CNPJ</th><th>Contato</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead><tbody id="tbodyFornecedores"></tbody></table></div>
+          </div>
+        </div>
+        <div id="comp-entradas" class="tab-content">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Produto</th><th>Qtd Entrada</th><th>Custo Unit.</th><th>Total</th><th>Ações</th></tr></thead><tbody id="tbodyEntradas"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <!-- ==================== FUNCIONÁRIOS ==================== -->
+      <section id="mod-funcionarios" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-users"></i> Módulo de Funcionários</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalFuncionario')"><i class="fas fa-plus"></i> Novo Funcionário</button>
+          </div>
+        </div>
+        <div class="tabs-bar">
+          <button class="tab active" onclick="switchTab('func','equipe',this)">Equipe</button>
+          <button class="tab" onclick="switchTab('func','presenca',this)">Presença</button>
+          <button class="tab" onclick="switchTab('func','ferias',this)">Férias</button>
+          <button class="tab" onclick="switchTab('func','desempenho',this)">Desempenho</button>
+        </div>
+        <div id="func-equipe" class="tab-content active">
+          <div id="funcionariosGrid" class="employee-grid"></div>
+        </div>
+        <div id="func-presenca" class="tab-content">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Funcionário</th><th>Entrada</th><th>Saída</th><th>Horas</th><th>Status</th></tr></thead><tbody id="tbodyPresenca"></tbody></table></div></div>
+        </div>
+        <div id="func-ferias" class="tab-content">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Funcionário</th><th>Início</th><th>Fim</th><th>Dias</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyFerias"></tbody></table></div></div>
+        </div>
+        <div id="func-desempenho" class="tab-content">
+          <div id="desempenhoGrid" class="desempenho-grid"></div>
+        </div>
+      </section>
+
+      <!-- ==================== TAREFAS ==================== -->
+      <section id="mod-tarefas" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-check-square"></i> Módulo de Tarefas</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalTarefa')"><i class="fas fa-plus"></i> Nova Tarefa</button>
+          </div>
+        </div>
+        <div class="kanban-board" id="kanbanBoard">
+          <div class="kanban-col" id="col-todo" ondragover="allowDrop(event)" ondrop="drop(event,'todo')">
+            <div class="kanban-col-header"><span class="col-dot todo"></span><h3>A Fazer</h3><span class="col-count" id="count-todo">0</span></div>
+            <div class="kanban-cards" id="cards-todo"></div>
+          </div>
+          <div class="kanban-col" id="col-doing" ondragover="allowDrop(event)" ondrop="drop(event,'doing')">
+            <div class="kanban-col-header"><span class="col-dot doing"></span><h3>Em Andamento</h3><span class="col-count" id="count-doing">0</span></div>
+            <div class="kanban-cards" id="cards-doing"></div>
+          </div>
+          <div class="kanban-col" id="col-review" ondragover="allowDrop(event)" ondrop="drop(event,'review')">
+            <div class="kanban-col-header"><span class="col-dot review"></span><h3>Em Revisão</h3><span class="col-count" id="count-review">0</span></div>
+            <div class="kanban-cards" id="cards-review"></div>
+          </div>
+          <div class="kanban-col" id="col-done" ondragover="allowDrop(event)" ondrop="drop(event,'done')">
+            <div class="kanban-col-header"><span class="col-dot done"></span><h3>Concluído</h3><span class="col-count" id="count-done">0</span></div>
+            <div class="kanban-cards" id="cards-done"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== AVISOS ==================== -->
+      <section id="mod-avisos" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-bell"></i> Avisos Internos</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalAviso')"><i class="fas fa-plus"></i> Novo Aviso</button>
+          </div>
+        </div>
+        <div id="avisosWall" class="avisos-wall"></div>
+      </section>
+
+      <!-- ==================== METAS ==================== -->
+      <section id="mod-metas" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-bullseye"></i> Módulo de Metas</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalMeta')"><i class="fas fa-plus"></i> Nova Meta</button>
+          </div>
+        </div>
+        <div id="metasGrid" class="metas-grid"></div>
+      </section>
+
+      <!-- ==================== MARKETING ==================== -->
+      <section id="mod-marketing" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-chart-line"></i> Módulo de Marketing</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalCampanha')"><i class="fas fa-plus"></i> Nova Campanha</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid kpi-4">
+          <div class="kpi-card blue"><div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div><div class="kpi-info"><span class="kpi-label">Total Investido</span><span class="kpi-value">R$ 12.300</span></div></div>
+          <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-mouse-pointer"></i></div><div class="kpi-info"><span class="kpi-label">Total Cliques</span><span class="kpi-value">48.720</span></div></div>
+          <div class="kpi-card gold"><div class="kpi-icon"><i class="fas fa-check-circle"></i></div><div class="kpi-info"><span class="kpi-label">Conversões</span><span class="kpi-value">867</span></div></div>
+          <div class="kpi-card purple"><div class="kpi-icon"><i class="fas fa-rocket"></i></div><div class="kpi-info"><span class="kpi-label">ROAS Médio</span><span class="kpi-value">7.1x</span></div></div>
+        </div>
+
+        <div class="charts-grid-2" style="margin-bottom:1.5rem">
+          <div class="chart-card"><div class="chart-header"><h3>Investimento por Canal</h3></div><canvas id="chartMktInvest" height="220"></canvas></div>
+          <div class="chart-card"><div class="chart-header"><h3>ROI por Campanha</h3></div><canvas id="chartMktROI" height="220"></canvas></div>
+        </div>
+
+        <div class="tabs-bar">
+          <button class="tab active" onclick="switchTab('mkt','campanhas',this)">Campanhas</button>
+          <button class="tab" onclick="switchTab('mkt','metaads',this)">Meta Ads</button>
+          <button class="tab" onclick="switchTab('mkt','googleads',this)">Google Ads</button>
+          <button class="tab" onclick="switchTab('mkt','mktplaces',this)">Marketplaces</button>
+        </div>
+        <div id="mkt-campanhas" class="tab-content active">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Canal</th><th>Campanha</th><th>Investimento</th><th>Cliques</th><th>Conversões</th><th>Receita</th><th>CAC</th><th>ROAS</th><th>ROI</th></tr></thead><tbody id="tbodyCampanhas"></tbody></table></div></div>
+        </div>
+        <div id="mkt-metaads" class="tab-content"><div class="chart-card"><div class="chart-header"><h3>Performance Meta Ads</h3></div><canvas id="chartMetaAds" height="250"></canvas></div></div>
+        <div id="mkt-googleads" class="tab-content"><div class="chart-card"><div class="chart-header"><h3>Performance Google Ads</h3></div><canvas id="chartGoogleAds" height="250"></canvas></div></div>
+        <div id="mkt-mktplaces" class="tab-content"><div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Plataforma</th><th>Vendas</th><th>Receita</th><th>Taxa</th><th>Líquido</th></tr></thead><tbody id="tbodyMktplaces"></tbody></table></div></div></div>
+      </section>
+
+      <!-- ==================== CRM ==================== -->
+      <section id="mod-crm" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-handshake"></i> CRM de Clientes</h2>
+          <div class="header-actions">
+            <button class="btn-primary" onclick="openModal('modalCliente')"><i class="fas fa-plus"></i> Novo Contato</button>
+          </div>
+        </div>
+
+        <div class="funil-section">
+          <h3 class="section-title">Funil de Vendas</h3>
+          <div class="funil-stages" id="funilStages"></div>
+        </div>
+
+        <div class="tabs-bar">
+          <button class="tab active" onclick="switchTab('crm','clientes',this)">Clientes</button>
+          <button class="tab" onclick="switchTab('crm','leads',this)">Leads</button>
+          <button class="tab" onclick="switchTab('crm','fornecedoresCRM',this)">Fornecedores</button>
+        </div>
+        <div id="crm-clientes" class="tab-content active">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Compras</th><th>Total Gasto</th><th>Última Compra</th><th>Ações</th></tr></thead><tbody id="tbodyClientes"></tbody></table></div></div>
+        </div>
+        <div id="crm-leads" class="tab-content">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>E-mail</th><th>Origem</th><th>Estágio</th><th>Valor Pot.</th><th>Ações</th></tr></thead><tbody id="tbodyLeads"></tbody></table></div></div>
+        </div>
+        <div id="crm-fornecedoresCRM" class="tab-content">
+          <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>CNPJ</th><th>Produto</th><th>Contato</th><th>Prazo Entrega</th><th>Ações</th></tr></thead><tbody id="tbodyFornCRM"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <!-- ==================== NUVEMSHOP ==================== -->
+      <section id="mod-nuvemshop" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-store"></i> Integração Nuvemshop</h2>
+          <div class="header-actions">
+            <span id="nsStatusChip" class="ns-status-chip offline"><i class="fas fa-circle"></i> Desconectada</span>
+            <button class="btn-outline btn-sm" onclick="checkNSStatus()"><i class="fas fa-rotate"></i> Verificar</button>
+          </div>
+        </div>
+        <div id="nuvemshopContent"></div>
+      </section>
+
+      <!-- ==================== CAPTAÇÃO LOJAS ==================== -->
+      <section id="mod-captacao" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-map-location-dot"></i> Captação de Lojas Country</h2>
+          <div class="header-actions">
+            <button class="btn-outline btn-sm" onclick="openModal('modalGMapsConfig')"><i class="fas fa-key"></i> Config. API</button>
+            <button class="btn-primary btn-sm" onclick="exportarLeads()"><i class="fas fa-file-excel"></i> Exportar</button>
+          </div>
+        </div>
+
+        <!-- BARRA DE BUSCA -->
+        <div class="captacao-search-bar">
+          <div class="captacao-search-wrap">
+            <div class="field-group" style="flex:2;margin:0">
+              <label>Palavra-chave</label>
+              <div class="input-icon">
+                <i class="fas fa-search"></i>
+                <input type="text" id="capKeyword" placeholder="loja country, country wear, moda country..." value="loja country">
+              </div>
+            </div>
+            <div class="field-group" style="flex:1;margin:0">
+              <label>Cidade / Estado</label>
+              <div class="input-icon">
+                <i class="fas fa-map-pin"></i>
+                <input type="text" id="capCidade" placeholder="Ex: Barretos SP, Goiânia GO...">
+              </div>
+            </div>
+            <div class="field-group" style="flex:0 0 140px;margin:0">
+              <label>Raio (km)</label>
+              <select id="capRaio" class="select-sm" style="width:100%">
+                <option value="5000">5 km</option>
+                <option value="10000" selected>10 km</option>
+                <option value="20000">20 km</option>
+                <option value="50000">50 km</option>
+                <option value="100000">100 km</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:8px">
+              <button class="btn-primary" onclick="buscarLojas()" id="btnBuscar" style="padding:10px 24px">
+                <i class="fas fa-search"></i> Buscar
+              </button>
+              <button class="btn-outline" onclick="limparResultados()" style="padding:10px 14px" title="Limpar">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- FILTROS RÁPIDOS -->
+          <div class="captacao-filtros">
+            <span style="font-size:12px;color:var(--text-2);font-weight:600">Filtrar:</span>
+            <button class="cap-filtro-btn active" onclick="filtrarCapStatus('todos',this)">Todos</button>
+            <button class="cap-filtro-btn" onclick="filtrarCapStatus('com_whats',this)"><i class="fab fa-whatsapp"></i> Com WhatsApp</button>
+            <button class="cap-filtro-btn" onclick="filtrarCapStatus('com_email',this)"><i class="fas fa-envelope"></i> Com E-mail</button>
+            <button class="cap-filtro-btn" onclick="filtrarCapStatus('salvos',this)"><i class="fas fa-star"></i> Salvos no CRM</button>
+            <span id="capTotal" style="margin-left:auto;font-size:12px;color:var(--text-2)"></span>
+          </div>
+        </div>
+
+        <!-- KPIs CAPTAÇÃO -->
+        <div class="kpi-grid kpi-4" id="capKPIs" style="margin-bottom:20px;display:none">
+          <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-store"></i></div><div class="kpi-info"><span class="kpi-label">Lojas Encontradas</span><span class="kpi-value" id="capKpiTotal">0</span></div></div>
+          <div class="kpi-card gold"><div class="kpi-icon"><i class="fab fa-whatsapp"></i></div><div class="kpi-info"><span class="kpi-label">Com WhatsApp</span><span class="kpi-value" id="capKpiWhats">0</span></div></div>
+          <div class="kpi-card blue"><div class="kpi-icon"><i class="fas fa-envelope"></i></div><div class="kpi-info"><span class="kpi-label">Com E-mail</span><span class="kpi-value" id="capKpiEmail">0</span></div></div>
+          <div class="kpi-card purple"><div class="kpi-icon"><i class="fas fa-star"></i></div><div class="kpi-info"><span class="kpi-label">Salvos no CRM</span><span class="kpi-value" id="capKpiCRM">0</span></div></div>
+        </div>
+
+        <!-- LOADING -->
+        <div id="capLoading" style="display:none;text-align:center;padding:48px">
+          <div class="spinner" style="width:32px;height:32px;margin:0 auto 16px"></div>
+          <p style="color:var(--text-2);font-size:14px" id="capLoadingMsg">Buscando lojas country...</p>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div id="capResultados" style="display:none">
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="data-table" id="tblCaptacao">
+                <thead>
+                  <tr>
+                    <th style="width:40px"><input type="checkbox" id="capSelectAll" onchange="selectAllLeads(this)"></th>
+                    <th>Loja</th>
+                    <th>Endereço</th>
+                    <th>Telefone</th>
+                    <th>WhatsApp</th>
+                    <th>E-mail</th>
+                    <th>Site</th>
+                    <th>Avaliação</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyCaptacao"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- AÇÕES EM MASSA -->
+          <div id="capAcoesMassa" style="display:none;margin-top:12px;display:flex;gap:8px;align-items:center">
+            <span id="capSelecionados" style="font-size:13px;color:var(--text-2)">0 selecionados</span>
+            <button class="btn-primary btn-sm" onclick="salvarSelecionadosCRM()"><i class="fas fa-users"></i> Salvar no CRM</button>
+            <button class="btn-outline btn-sm" onclick="exportarSelecionados()"><i class="fas fa-download"></i> Exportar CSV</button>
+            <button class="btn-outline btn-sm" onclick="abrirWhatsAppMassa()"><i class="fab fa-whatsapp"></i> WhatsApp em massa</button>
+          </div>
+        </div>
+
+        <!-- ESTADO INICIAL -->
+        <div id="capEmpty" style="text-align:center;padding:64px 24px">
+          <i class="fas fa-map-location-dot" style="font-size:56px;color:var(--border-2);display:block;margin-bottom:16px"></i>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">Encontre Lojas Country no Google Maps</h3>
+          <p style="color:var(--text-2);max-width:480px;margin:0 auto 24px;line-height:1.6">
+            Busque lojas country por cidade, extraia WhatsApp, e-mail e dados de contato automaticamente para prospecção de clientes.
+          </p>
+          <div class="captacao-estados-grid">
+            <div class="cap-estado-chip" onclick="buscarEstado('Goiás')"><span>🤠</span> Goiás</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('Mato Grosso')"><span>🤠</span> Mato Grosso</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('Minas Gerais')"><span>🤠</span> Minas Gerais</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('São Paulo')"><span>🤠</span> São Paulo</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('Bahia')"><span>🤠</span> Bahia</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('Paraná')"><span>🤠</span> Paraná</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('Rio Grande do Sul')"><span>🤠</span> Rio Grande do Sul</div>
+            <div class="cap-estado-chip" onclick="buscarEstado('Mato Grosso do Sul')"><span>🤠</span> Mato Grosso do Sul</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== RELATÓRIOS ==================== -->
+      <section id="mod-relatorios" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-file-chart-column"></i> Relatórios</h2>
+        </div>
+        <div class="relatorios-grid">
+          <div class="relatorio-card" onclick="gerarRelatorio('financeiro')">
+            <div class="rel-icon green"><i class="fas fa-dollar-sign"></i></div>
+            <h3>Relatório Financeiro</h3>
+            <p>Receitas, despesas, fluxo de caixa e margem</p>
+            <div class="rel-actions">
+              <button class="btn-sm btn-primary" onclick="event.stopPropagation();exportPDF('financeiro')"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="btn-sm btn-outline" onclick="event.stopPropagation();exportExcel('financeiro')"><i class="fas fa-file-excel"></i> Excel</button>
+            </div>
+          </div>
+          <div class="relatorio-card" onclick="gerarRelatorio('estoque')">
+            <div class="rel-icon gold"><i class="fas fa-boxes-stacked"></i></div>
+            <h3>Relatório de Estoque</h3>
+            <p>Produtos, quantidades, valores e alertas</p>
+            <div class="rel-actions">
+              <button class="btn-sm btn-primary" onclick="event.stopPropagation();exportPDF('estoque')"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="btn-sm btn-outline" onclick="event.stopPropagation();exportExcel('estoque')"><i class="fas fa-file-excel"></i> Excel</button>
+            </div>
+          </div>
+          <div class="relatorio-card" onclick="gerarRelatorio('marketing')">
+            <div class="rel-icon blue"><i class="fas fa-chart-line"></i></div>
+            <h3>Relatório de Marketing</h3>
+            <p>Campanhas, ROI, ROAS, CAC e CPA</p>
+            <div class="rel-actions">
+              <button class="btn-sm btn-primary" onclick="event.stopPropagation();exportPDF('marketing')"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="btn-sm btn-outline" onclick="event.stopPropagation();exportExcel('marketing')"><i class="fas fa-file-excel"></i> Excel</button>
+            </div>
+          </div>
+          <div class="relatorio-card" onclick="gerarRelatorio('funcionarios')">
+            <div class="rel-icon purple"><i class="fas fa-users"></i></div>
+            <h3>Relatório de Funcionários</h3>
+            <p>Equipe, presença, desempenho e metas</p>
+            <div class="rel-actions">
+              <button class="btn-sm btn-primary" onclick="event.stopPropagation();exportPDF('funcionarios')"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="btn-sm btn-outline" onclick="event.stopPropagation();exportExcel('funcionarios')"><i class="fas fa-file-excel"></i> Excel</button>
+            </div>
+          </div>
+          <div class="relatorio-card" onclick="gerarRelatorio('vendas')">
+            <div class="rel-icon orange"><i class="fas fa-bag-shopping"></i></div>
+            <h3>Relatório de Vendas</h3>
+            <p>Pedidos, ticket médio, canais e crescimento</p>
+            <div class="rel-actions">
+              <button class="btn-sm btn-primary" onclick="event.stopPropagation();exportPDF('vendas')"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="btn-sm btn-outline" onclick="event.stopPropagation();exportExcel('vendas')"><i class="fas fa-file-excel"></i> Excel</button>
+            </div>
+          </div>
+        </div>
+        <div id="relatorioPreview" class="relatorio-preview hidden"></div>
+      </section>
+
+      <!-- ==================== INTELIGÊNCIA IA ==================== -->
+      <section id="mod-inteligencia" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-brain"></i> Painel de Inteligência IA</h2>
+          <span class="ia-badge"><i class="fas fa-sparkles"></i> Power IA</span>
+        </div>
+
+        <div class="ia-container">
+          <div class="ia-sidebar">
+            <h4>Perguntas Sugeridas</h4>
+            <div class="ia-suggestions">
+              <button class="ia-sug" onclick="askIA('Qual foi o faturamento do mês?')">💰 Qual foi o faturamento do mês?</button>
+              <button class="ia-sug" onclick="askIA('Qual produto mais vendeu?')">🏆 Qual produto mais vendeu?</button>
+              <button class="ia-sug" onclick="askIA('Qual anúncio teve maior ROI?')">📊 Qual anúncio teve maior ROI?</button>
+              <button class="ia-sug" onclick="askIA('Quais tarefas estão atrasadas?')">⏰ Quais tarefas estão atrasadas?</button>
+              <button class="ia-sug" onclick="askIA('Qual funcionário possui mais atividades concluídas?')">👑 Funcionário mais produtivo?</button>
+              <button class="ia-sug" onclick="askIA('Qual é a situação do estoque?')">📦 Situação do estoque?</button>
+              <button class="ia-sug" onclick="askIA('Qual canal de venda tem melhor performance?')">📈 Melhor canal de venda?</button>
+              <button class="ia-sug" onclick="askIA('Como está o fluxo de caixa?')">💵 Como está o fluxo de caixa?</button>
+            </div>
+            <div class="ia-stats">
+              <h4>Resumo Rápido</h4>
+              <div class="ia-stat-item"><i class="fas fa-chart-line green-text"></i> Crescimento: <strong>+38%</strong></div>
+              <div class="ia-stat-item"><i class="fas fa-star gold-text"></i> Score Geral: <strong>87/100</strong></div>
+              <div class="ia-stat-item"><i class="fas fa-fire orange-text"></i> Tendência: <strong>Alta</strong></div>
+            </div>
+          </div>
+          <div class="ia-chat">
+            <div class="ia-messages" id="iaMessages">
+              <div class="ia-msg bot">
+                <div class="ia-avatar"><i class="fas fa-brain"></i></div>
+                <div class="ia-bubble">
+                  <p>Olá! Sou a <strong>Power IA</strong>, sua assistente inteligente da Power Ropes. 🚀</p>
+                  <p>Posso analisar seus dados em tempo real e responder perguntas sobre faturamento, estoque, marketing, tarefas e muito mais.</p>
+                  <p>O que você gostaria de saber hoje?</p>
+                </div>
+              </div>
+            </div>
+            <div class="ia-input-area">
+              <input type="text" id="iaInput" placeholder="Faça uma pergunta sobre seu negócio..." onkeypress="if(event.key==='Enter')sendIA()">
+              <button class="btn-ia" onclick="sendIA()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- end module-container -->
+  </main>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Modal Financeiro -->
+<div id="modalFinanceiro" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Nova Transação</h3><button onclick="closeModal('modalFinanceiro')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Tipo</label><select id="finTipo"><option>Receita</option><option>Despesa</option><option>Conta a Pagar</option><option>Conta a Receber</option><option>Investimento</option><option>Imposto</option></select></div>
+        <div class="field-group"><label>Descrição</label><input type="text" id="finDesc" placeholder="Descrição da transação"></div>
+        <div class="field-group"><label>Valor (R$)</label><input type="number" id="finValor" placeholder="0,00"></div>
+        <div class="field-group"><label>Data</label><input type="date" id="finData"></div>
+        <div class="field-group"><label>Categoria</label><input type="text" id="finCategoria" placeholder="Ex: Vendas, Marketing..."></div>
+        <div class="field-group"><label>Status</label><select id="finStatus"><option>Pago</option><option>Pendente</option><option>Vencido</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalFinanceiro')">Cancelar</button><button class="btn-primary" onclick="saveFinanceiro()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Produto -->
+<div id="modalProduto" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Produto</h3><button onclick="closeModal('modalProduto')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Nome</label><input type="text" id="prodNome" placeholder="Nome do produto"></div>
+        <div class="field-group"><label>SKU</label><input type="text" id="prodSKU" placeholder="PR-001"></div>
+        <div class="field-group"><label>Categoria</label><select id="prodCategoria"><option>Suplementos</option><option>Roupas</option><option>Acessórios</option><option>Equipamentos</option></select></div>
+        <div class="field-group"><label>Fornecedor</label><input type="text" id="prodFornecedor" placeholder="Nome do fornecedor"></div>
+        <div class="field-group"><label>Quantidade</label><input type="number" id="prodQtd" placeholder="0"></div>
+        <div class="field-group"><label>Qtd Mínima</label><input type="number" id="prodQtdMin" placeholder="10"></div>
+        <div class="field-group"><label>Custo (R$)</label><input type="number" id="prodCusto" placeholder="0,00"></div>
+        <div class="field-group"><label>Venda (R$)</label><input type="number" id="prodVenda" placeholder="0,00"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalProduto')">Cancelar</button><button class="btn-primary" onclick="saveProduto()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Tarefa -->
+<div id="modalTarefa" class="modal-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3>Nova Tarefa</h3><button onclick="closeModal('modalTarefa')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group full"><label>Título</label><input type="text" id="tarTitulo" placeholder="Título da tarefa"></div>
+        <div class="field-group full"><label>Descrição</label><textarea id="tarDesc" rows="3" placeholder="Descrição detalhada..."></textarea></div>
+        <div class="field-group"><label>Responsável</label><input type="text" id="tarResp" placeholder="Nome do responsável"></div>
+        <div class="field-group"><label>Data Limite</label><input type="date" id="tarData"></div>
+        <div class="field-group"><label>Prioridade</label><select id="tarPrioridade"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
+        <div class="field-group"><label>Status</label><select id="tarStatus"><option value="todo">A Fazer</option><option value="doing">Em Andamento</option><option value="review">Em Revisão</option><option value="done">Concluído</option></select></div>
+        <div class="field-group full"><label>Checklist (um item por linha)</label><textarea id="tarChecklist" rows="3" placeholder="Item 1&#10;Item 2&#10;Item 3"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalTarefa')">Cancelar</button><button class="btn-primary" onclick="saveTarefa()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Aviso -->
+<div id="modalAviso" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Aviso</h3><button onclick="closeModal('modalAviso')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Tipo</label><select id="avisoTipo"><option>Chegada de Produto</option><option>Reunião</option><option>Treinamento</option><option>Comunicado Geral</option></select></div>
+        <div class="field-group"><label>Título</label><input type="text" id="avisoTitulo" placeholder="Título do aviso"></div>
+        <div class="field-group full"><label>Mensagem</label><textarea id="avisoMsg" rows="4" placeholder="Conteúdo do aviso..."></textarea></div>
+        <div class="field-group"><label>Destinatários</label><select id="avDest"><option>Todos</option><option>Gestores</option><option>Financeiro</option><option>Estoque</option><option>Marketing</option></select></div>
+        <div class="field-group"><label>Prioridade</label><select id="avPrioridade"><option value="normal">Normal</option><option value="importante">Importante</option><option value="urgente">Urgente</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalAviso')">Cancelar</button><button class="btn-primary" onclick="saveAviso()">Publicar</button></div>
+  </div>
+</div>
+
+<!-- Modal Meta -->
+<div id="modalMeta" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Nova Meta</h3><button onclick="closeModal('modalMeta')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Tipo</label><select id="metaTipo"><option>Vendas</option><option>Faturamento</option><option>ROI</option><option>Estoque</option><option>Marketing</option></select></div>
+        <div class="field-group"><label>Título</label><input type="text" id="metaTitulo" placeholder="Ex: Faturar R$ 100k no mês"></div>
+        <div class="field-group"><label>Valor Meta</label><input type="number" id="metaValor" placeholder="100000"></div>
+        <div class="field-group"><label>Valor Atual</label><input type="number" id="metaAtual" placeholder="0"></div>
+        <div class="field-group"><label>Prazo</label><input type="date" id="metaPrazo"></div>
+        <div class="field-group"><label>Responsável</label><input type="text" id="metaResp" placeholder="Nome ou equipe"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalMeta')">Cancelar</button><button class="btn-primary" onclick="saveMeta()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Funcionário -->
+<div id="modalFuncionario" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Funcionário</h3><button onclick="closeModal('modalFuncionario')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Nome</label><input type="text" id="funcNome"></div>
+        <div class="field-group"><label>Cargo</label><input type="text" id="funcCargo"></div>
+        <div class="field-group"><label>Departamento</label><select id="funcDepto"><option>Comercial</option><option>Financeiro</option><option>Marketing</option><option>Estoque</option><option>TI</option><option>Administrativo</option></select></div>
+        <div class="field-group"><label>Telefone</label><input type="text" id="funcTel"></div>
+        <div class="field-group"><label>E-mail</label><input type="email" id="funcEmail"></div>
+        <div class="field-group"><label>Contratação</label><input type="date" id="funcData"></div>
+        <div class="field-group"><label>Salário (R$)</label><input type="number" id="funcSalario"></div>
+        <div class="field-group"><label>Status</label><select id="funcStatus"><option>Ativo</option><option>Férias</option><option>Afastado</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalFuncionario')">Cancelar</button><button class="btn-primary" onclick="saveFuncionario()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Campanha -->
+<div id="modalCampanha" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Nova Campanha</h3><button onclick="closeModal('modalCampanha')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Canal</label><select id="campCanal"><option>Meta Ads</option><option>Google Ads</option><option>Mercado Livre</option><option>Shopee</option><option>Site</option></select></div>
+        <div class="field-group"><label>Nome da Campanha</label><input type="text" id="campNome"></div>
+        <div class="field-group"><label>Investimento (R$)</label><input type="number" id="campInvest"></div>
+        <div class="field-group"><label>Cliques</label><input type="number" id="campCliques"></div>
+        <div class="field-group"><label>Conversões</label><input type="number" id="campConv"></div>
+        <div class="field-group"><label>Receita (R$)</label><input type="number" id="campReceita"></div>
+        <div class="field-group"><label>Período</label><input type="month" id="campPeriodo"></div>
+        <div class="field-group"><label>Status</label><select id="campStatus"><option>Ativa</option><option>Pausada</option><option>Encerrada</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalCampanha')">Cancelar</button><button class="btn-primary" onclick="saveCampanha()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Cliente -->
+<div id="modalCliente" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Contato</h3><button onclick="closeModal('modalCliente')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Tipo</label><select id="cliTipo"><option>Cliente</option><option>Lead</option><option>Fornecedor</option></select></div>
+        <div class="field-group"><label>Nome</label><input type="text" id="cliNome"></div>
+        <div class="field-group"><label>E-mail</label><input type="email" id="cliEmail"></div>
+        <div class="field-group"><label>Telefone</label><input type="text" id="cliTel"></div>
+        <div class="field-group"><label>Origem</label><select id="cliOrigem"><option>Instagram</option><option>Google</option><option>Indicação</option><option>Site</option><option>Shopee</option><option>ML</option></select></div>
+        <div class="field-group"><label>Estágio</label><select id="cliEstagio"><option>Novo Lead</option><option>Contato Feito</option><option>Proposta</option><option>Negociação</option><option>Cliente</option></select></div>
+        <div class="field-group full"><label>Observações</label><textarea id="cliObs" rows="3"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalCliente')">Cancelar</button><button class="btn-primary" onclick="saveCliente()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Compra -->
+<div id="modalCompra" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Nova Compra</h3><button onclick="closeModal('modalCompra')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Fornecedor</label><input type="text" id="compForn"></div>
+        <div class="field-group"><label>Data</label><input type="date" id="compData"></div>
+        <div class="field-group"><label>Produtos</label><input type="text" id="compProd" placeholder="Ex: Whey Protein x 50"></div>
+        <div class="field-group"><label>Total (R$)</label><input type="number" id="compTotal"></div>
+        <div class="field-group"><label>Status</label><select id="compStatus"><option>Pendente</option><option>Confirmada</option><option>Entregue</option></select></div>
+        <div class="field-group"><label>Previsão Entrega</label><input type="date" id="compEntrega"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalCompra')">Cancelar</button><button class="btn-primary" onclick="saveCompra()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Fornecedor -->
+<div id="modalFornecedor" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>Novo Fornecedor</h3><button onclick="closeModal('modalFornecedor')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Nome</label><input type="text" id="fornNome"></div>
+        <div class="field-group"><label>CNPJ</label><input type="text" id="fornCNPJ" placeholder="00.000.000/0001-00"></div>
+        <div class="field-group"><label>Contato</label><input type="text" id="fornContato"></div>
+        <div class="field-group"><label>Telefone</label><input type="text" id="fornTel"></div>
+        <div class="field-group"><label>E-mail</label><input type="email" id="fornEmail"></div>
+        <div class="field-group"><label>Prazo Entrega</label><input type="text" id="fornPrazo" placeholder="Ex: 7 dias úteis"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalFornecedor')">Cancelar</button><button class="btn-primary" onclick="saveFornecedor()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Modal Config Google Maps -->
+<div id="modalGMapsConfig" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3><i class="fas fa-key"></i> Configurar Google Maps API</h3><button onclick="closeModal('modalGMapsConfig')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;line-height:1.7">
+        <strong style="color:#60a5fa"><i class="fas fa-info-circle"></i> Como obter a chave gratuita:</strong><br>
+        1. Acesse <a href="https://console.cloud.google.com" target="_blank" style="color:#60a5fa">console.cloud.google.com</a><br>
+        2. Crie um projeto → Ative <strong>Places API</strong> e <strong>Geocoding API</strong><br>
+        3. Vá em <strong>Credenciais</strong> → Criar chave de API<br>
+        4. Cole a chave abaixo. O plano gratuito permite ~1.000 buscas/mês.
+      </div>
+      <div class="field-group">
+        <label>Google Maps API Key</label>
+        <div class="input-icon">
+          <i class="fas fa-key"></i>
+          <input type="text" id="gmapsApiKey" placeholder="AIzaSy...">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Modo de busca</label>
+        <select id="capModo">
+          <option value="places">Google Places API (requer chave)</option>
+          <option value="manual">Entrada Manual (sem API)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('modalGMapsConfig')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarConfigGMaps()"><i class="fas fa-save"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes Lead -->
+<div id="modalLeadDetalhe" class="modal-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h3 id="leadDetalheNome">Detalhes da Loja</h3><button onclick="closeModal('modalLeadDetalhe')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="leadDetalheBody"></div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('modalLeadDetalhe')">Fechar</button>
+      <button class="btn-primary" id="btnSalvarLead" onclick="salvarLeadCRM()"><i class="fas fa-users"></i> Salvar no CRM</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="app.js"></script>
+<script src="vendas.js"></script>
+<script src="nuvemshop.js"></script>
+<script src="captacao.js"></script>
+</body>
+</html>
