@@ -50,12 +50,12 @@ app.use(express.json());
 // Nota: express.static será configurado NO FINAL, após todas as rotas de API
 
 // ──────────────────────────────────────────────
-// Nuvemshop credentials (env ou body da request)
+// Nuvemshop credentials (env, banco de dados ou hardcoded)
 // ──────────────────────────────────────────────
 let NS_STORE_ID    = process.env.NUVEMSHOP_STORE_ID     || '';
 let NS_TOKEN       = process.env.NUVEMSHOP_ACCESS_TOKEN  || '';
 const NS_APP_ID    = process.env.NUVEMSHOP_APP_ID     || '33221';
-const NS_SECRET    = process.env.NUVEMSHOP_CLIENT_SECRET || '';
+const NS_SECRET    = process.env.NUVEMSHOP_CLIENT_SECRET || '173615da148d50b276ddccb4e3fa435df821984cfbde4e8b';
 const NS_BASE      = 'https://api.nuvemshop.com.br/v1';
 const NS_AGENT     = 'PowerHub/1.0 (contato@powerropes.com.br)';
 
