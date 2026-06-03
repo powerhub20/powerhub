@@ -920,43 +920,60 @@ window.showModule = function(name, el) {
 };
 
 // ============================
-// CARREGAR DADOS DO EXCEL OU NUVEMSHOP
+// CARREGAR DADOS DO EXCEL (2020-2025) + NUVEMSHOP (2026)
 // ============================
 async function loadVendasFromExcel() {
   try {
-    // 1. Carregar dados do Excel (histórico)
+    // 1. Carregar dados do Excel (APENAS 2020-2025, não 2026)
     const responseExcel = await fetch('/api/vendas/load');
     if (responseExcel.ok) {
       const dataExcel = await responseExcel.json();
-      if (dataExcel.faturamento) Object.assign(VENDAS_DATA.faturamento, dataExcel.faturamento);
-      if (dataExcel.totais) Object.assign(VENDAS_DATA.totais, dataExcel.totais);
-      if (dataExcel.investimentoTotal) Object.assign(VENDAS_DATA.investimentoTotal, dataExcel.investimentoTotal);
+      if (dataExcel.faturamento) {
+        // Copiar apenas 2020-2025 do Excel, 2026 fica zerado até Nuvemshop carregar
+        Object.keys(dataExcel.faturamento).forEach(ano => {
+          if (ano !== '2026') {  // Ignorar 2026 do Excel
+            VENDAS_DATA.faturamento[ano] = dataExcel.faturamento[ano];
+          }
+        });
+      }
+      if (dataExcel.totais) {
+        Object.keys(dataExcel.totais).forEach(ano => {
+          if (ano !== '2026') {  // Ignorar 2026 do Excel
+            VENDAS_DATA.totais[ano] = dataExcel.totais[ano];
+          }
+        });
+      }
+      if (dataExcel.investimentoTotal) {
+        Object.keys(dataExcel.investimentoTotal).forEach(ano => {
+          if (ano !== '2026') {  // Ignorar 2026 do Excel
+            VENDAS_DATA.investimentoTotal[ano] = dataExcel.investimentoTotal[ano];
+          }
+        });
+      }
       if (dataExcel.investimento2024) VENDAS_DATA.investimento2024 = dataExcel.investimento2024;
       if (dataExcel.investimento2025) VENDAS_DATA.investimento2025 = dataExcel.investimento2025;
-      if (dataExcel.investimento2026) VENDAS_DATA.investimento2026 = dataExcel.investimento2026;
       if (dataExcel.facebook2024) VENDAS_DATA.facebook2024 = dataExcel.facebook2024;
       if (dataExcel.google2024) VENDAS_DATA.google2024 = dataExcel.google2024;
       if (dataExcel.roi2024) VENDAS_DATA.roi2024 = dataExcel.roi2024;
       if (dataExcel.roi2025) VENDAS_DATA.roi2025 = dataExcel.roi2025;
-      if (dataExcel.roi2026) VENDAS_DATA.roi2026 = dataExcel.roi2026;
     }
 
-    // 2. Tentar carregar dados do Nuvemshop (sobrescreve 2026 se estiver conectado)
+    // 2. Carregar dados do Nuvemshop (OBRIGATÓRIO para 2026)
     try {
       const responseNS = await fetch('/api/vendas/nuvemshop');
       if (responseNS.ok) {
         const dataNS = await responseNS.json();
         if (dataNS.faturamento && dataNS.faturamento[2026]) {
-          console.log('✅ Dados do Nuvemshop encontrados! Atualizando 2026...');
+          console.log('✅ Sincronizando 2026 do Nuvemshop (pedidos pagos)...');
           VENDAS_DATA.faturamento[2026] = dataNS.faturamento[2026];
           VENDAS_DATA.totais[2026] = dataNS.totais[2026] || 0;
         }
       }
     } catch (e) {
-      // Nuvemshop não conectado, ok usar só Excel
+      console.warn('⚠️ Nuvemshop não disponível, 2026 vazio');
     }
 
-    console.log('✅ Dados carregados!', VENDAS_DATA);
+    console.log('✅ Dados carregados! (2020-2025 Excel + 2026 Nuvemshop)', VENDAS_DATA);
 
     // Atualizar gráficos se módulos estão abertos
     if (document.getElementById('mod-dashboard').style.display !== 'none') {
