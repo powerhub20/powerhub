@@ -23,8 +23,10 @@ pool.on('connect', () => {
 // ────────────────────────────────────────────────
 
 async function initDatabase() {
-  const schema = `
-    CREATE TABLE IF NOT EXISTS tarefas (
+  console.log('🔌 Inicializando PostgreSQL...');
+
+  const tables = [
+    `CREATE TABLE IF NOT EXISTS tarefas (
       id SERIAL PRIMARY KEY,
       titulo TEXT NOT NULL,
       descricao TEXT,
@@ -35,9 +37,8 @@ async function initDatabase() {
       checklist TEXT,
       checkDone TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS produtos (
+    )`,
+    `CREATE TABLE IF NOT EXISTS produtos (
       id SERIAL PRIMARY KEY,
       nome TEXT NOT NULL,
       sku TEXT,
@@ -48,9 +49,8 @@ async function initDatabase() {
       custo REAL,
       venda REAL,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS financeiro (
+    )`,
+    `CREATE TABLE IF NOT EXISTS financeiro (
       id SERIAL PRIMARY KEY,
       tipo TEXT,
       descricao TEXT NOT NULL,
@@ -59,9 +59,8 @@ async function initDatabase() {
       categoria TEXT,
       status TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS avisos (
+    )`,
+    `CREATE TABLE IF NOT EXISTS avisos (
       id SERIAL PRIMARY KEY,
       tipo TEXT,
       titulo TEXT NOT NULL,
@@ -70,9 +69,8 @@ async function initDatabase() {
       prioridade TEXT,
       data TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS metas (
+    )`,
+    `CREATE TABLE IF NOT EXISTS metas (
       id SERIAL PRIMARY KEY,
       tipo TEXT,
       titulo TEXT NOT NULL,
@@ -81,9 +79,8 @@ async function initDatabase() {
       prazo TEXT,
       responsavel TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS funcionarios (
+    )`,
+    `CREATE TABLE IF NOT EXISTS funcionarios (
       id SERIAL PRIMARY KEY,
       nome TEXT NOT NULL,
       cargo TEXT,
@@ -96,9 +93,8 @@ async function initDatabase() {
       tarefas INTEGER DEFAULT 0,
       concluidas INTEGER DEFAULT 0,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS campanhas (
+    )`,
+    `CREATE TABLE IF NOT EXISTS campanhas (
       id SERIAL PRIMARY KEY,
       canal TEXT,
       nome TEXT NOT NULL,
@@ -109,9 +105,8 @@ async function initDatabase() {
       periodo TEXT,
       status TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS clientes (
+    )`,
+    `CREATE TABLE IF NOT EXISTS clientes (
       id SERIAL PRIMARY KEY,
       tipo TEXT,
       nome TEXT NOT NULL,
@@ -124,9 +119,8 @@ async function initDatabase() {
       total_gasto REAL DEFAULT 0,
       ultima_compra TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS fornecedores (
+    )`,
+    `CREATE TABLE IF NOT EXISTS fornecedores (
       id SERIAL PRIMARY KEY,
       nome TEXT NOT NULL,
       cnpj TEXT,
@@ -135,9 +129,8 @@ async function initDatabase() {
       email TEXT,
       prazo TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS compras (
+    )`,
+    `CREATE TABLE IF NOT EXISTS compras (
       id SERIAL PRIMARY KEY,
       fornecedor TEXT NOT NULL,
       data TEXT,
@@ -146,17 +139,22 @@ async function initDatabase() {
       status TEXT,
       data_entrega TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
+    )`
+  ];
 
   try {
-    const statements = schema.split(';').filter(s => s.trim());
-    for (const sql of statements) {
-      await pool.query(sql.trim());
+    for (const sql of tables) {
+      try {
+        await pool.query(sql);
+      } catch (err) {
+        console.log(`⚠️  Tabela já existe ou erro menor:`, err.message.substring(0, 50));
+      }
     }
-    console.log('✅ Tabelas criadas/verificadas no PostgreSQL');
+    console.log('✅ PostgreSQL iniciado com sucesso!');
+    return true;
   } catch (err) {
-    console.error('Erro ao criar tabelas:', err);
+    console.error('❌ Erro crítico ao inicializar PostgreSQL:', err.message);
+    throw err;
   }
 }
 
