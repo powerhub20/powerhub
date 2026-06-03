@@ -403,15 +403,8 @@ function renderDashboardCharts(period = 'mes') {
 
   // Categorias
   destroyChart('cat');
-  const ctxC = document.getElementById('chartCategoria');
-  if (ctxC) charts['cat'] = new Chart(ctxC, {
-    type: 'doughnut',
-    data: {
-      labels: ['Suplementos','Roupas','Acessórios','Equipamentos'],
-      datasets: [{ data: [58,22,14,6], backgroundColor: [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple], borderWidth: 0, hoverOffset: 6 }]
-    },
-    options: { responsive:true, cutout:'65%', plugins:{ legend:{ position:'bottom', labels:{ padding:16, usePointStyle:true } } } }
-  });
+  // Carregar categorias da Nuvemshop (async)
+  carregarCategoriasNuvemshop();
 
   // Canal vendas
   destroyChart('canal');
@@ -572,6 +565,90 @@ function chartOpts({ prefix='', suffix='', yMax=null }={}) {
       y:{ grid:{ color:gridColor() }, ticks:{ color:textColor(), font:{size:11}, callback: v => prefix + v.toLocaleString('pt-BR') + suffix }, max: yMax||undefined, beginAtZero:true }
     }
   };
+}
+
+// ============================
+// Carregar Categorias da Nuvemshop
+// ============================
+function carregarCategoriasNuvemshop() {
+  apiRequest('GET', '/api/vendas/categorias', null, (data) => {
+    if (!data || !data.categorias || data.categorias.length === 0) {
+      console.log('⚠️ Sem dados de categorias');
+      renderCategoriasDefault();
+      return;
+    }
+
+    const ctxC = document.getElementById('chartCategoria');
+    if (!ctxC) return;
+
+    // Preparar dados
+    const labels = data.categorias.map(c => c.nome);
+    const valores = data.categorias.map(c => c.valor);
+    const cores = [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple, COLORS.orange, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.yellow, COLORS.lime];
+
+    // Destruir gráfico anterior
+    if (charts['cat']) {
+      charts['cat'].destroy();
+      delete charts['cat'];
+    }
+
+    // Criar novo gráfico
+    charts['cat'] = new Chart(ctxC, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: valores,
+          backgroundColor: cores.slice(0, labels.length),
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 16,
+              usePointStyle: true,
+              color: textColor(),
+              font: { size: 11 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const value = ctx.parsed || 0;
+                return ' R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+}
+
+// Fallback com dados estáticos
+function renderCategoriasDefault() {
+  const ctxC = document.getElementById('chartCategoria');
+  if (!ctxC) return;
+
+  if (charts['cat']) {
+    charts['cat'].destroy();
+    delete charts['cat'];
+  }
+
+  charts['cat'] = new Chart(ctxC, {
+    type: 'doughnut',
+    data: {
+      labels: ['Suplementos','Roupas','Acessórios','Equipamentos'],
+      datasets: [{ data: [58,22,14,6], backgroundColor: [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: { responsive:true, cutout:'65%', plugins:{ legend:{ position:'bottom', labels:{ padding:16, usePointStyle:true } } } }
+  });
 }
 
 // ============================

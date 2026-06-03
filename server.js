@@ -735,6 +735,93 @@ app.get('/api/vendas/nuvemshop', async (req, res) => {
   }
 });
 
+// ──────────────────────────────────────────────
+// Categorias mais vendidas (Nuvemshop)
+// ──────────────────────────────────────────────
+app.get('/api/vendas/categorias', async (req, res) => {
+  if (!NS_STORE_ID || !NS_TOKEN) {
+    return res.status(401).json({ error: 'Nuvemshop não configurada' });
+  }
+
+  try {
+    const headers = {
+      'Authentication': `bearer ${NS_TOKEN}`,
+      'User-Agent': NS_AGENT,
+      'Content-Type': 'application/json',
+    };
+
+    // Buscar pedidos pagos
+    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=200&payment_status=paid&fields=id,products,created_at`;
+    const rOrders = await fetch(urlOrders, { headers });
+
+    if (!rOrders.ok) {
+      console.log('⚠️ Erro ao buscar pedidos:', rOrders.status);
+      return res.json({ categorias: [] });
+    }
+
+    const orders = await rOrders.json();
+    if (!Array.isArray(orders)) {
+      return res.json({ categorias: [] });
+    }
+
+    // Buscar produtos com categorias
+    const urlProducts = `${NS_BASE}/${NS_STORE_ID}/products?per_page=200&fields=id,name,categories`;
+    const rProducts = await fetch(urlProducts, { headers });
+
+    if (!rProducts.ok) {
+      console.log('⚠️ Erro ao buscar produtos:', rProducts.status);
+      return res.json({ categorias: [] });
+    }
+
+    const products = await rProducts.json();
+    const productMap = {};
+
+    // Mapear produtos por ID com suas categorias
+    if (Array.isArray(products)) {
+      products.forEach(p => {
+        productMap[p.id] = {
+          name: p.name,
+          categories: Array.isArray(p.categories) ? p.categories.map(c => c.name || c) : []
+        };
+      });
+    }
+
+    // Agregar vendas por categoria
+    const categoriaVendas = {};
+
+    orders.forEach(order => {
+      if (!Array.isArray(order.products)) return;
+
+      order.products.forEach(item => {
+        const prod = productMap[item.product_id];
+        if (!prod) return;
+
+        const categorias = prod.categories.length > 0 ? prod.categories : ['Sem Categoria'];
+        const valor = parseFloat(item.price) * parseInt(item.quantity) || 0;
+
+        categorias.forEach(cat => {
+          if (!categoriaVendas[cat]) {
+            categoriaVendas[cat] = 0;
+          }
+          categoriaVendas[cat] += valor;
+        });
+      });
+    });
+
+    // Converter para array e ordenar
+    const resultado = Object.entries(categoriaVendas)
+      .map(([nome, valor]) => ({ nome, valor }))
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 10);  // Top 10 categorias
+
+    console.log('✅ Categorias carregadas:', resultado);
+    res.json({ categorias: resultado });
+  } catch (e) {
+    console.error('Erro ao buscar categorias:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ══════════════════════════════════════════════
 // CAPTAÇÃO DE LOJAS — Google Places API Proxy
 // ══════════════════════════════════════════════
