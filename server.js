@@ -625,6 +625,76 @@ app.get('/api/vendas/load', (req, res) => {
   }
 });
 
+// ──────────────────────────────────────────────
+// VENDAS DO NUVEMSHOP
+// Puxa pedidos pagos e retorna faturamento por mês
+// ──────────────────────────────────────────────
+app.get('/api/vendas/nuvemshop', async (req, res) => {
+  if (!NS_STORE_ID || !NS_TOKEN) {
+    return res.status(401).json({ error: 'Nuvemshop não configurada' });
+  }
+
+  try {
+    const resultado = {
+      faturamento: { 2024: [], 2025: [], 2026: [] },
+      totais: { 2024: 0, 2025: 0, 2026: 0 },
+      investimentoTotal: { 2024: 0, 2025: 0, 2026: 0 },
+      investimento2024: [],
+      investimento2025: [],
+      investimento2026: [],
+      meses: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+    };
+
+    // Inicializar arrays com zeros
+    for (let i = 0; i < 12; i++) {
+      resultado.faturamento[2024][i] = 0;
+      resultado.faturamento[2025][i] = 0;
+      resultado.faturamento[2026][i] = 0;
+    }
+
+    // Buscar pedidos pagos do Nuvemshop (últimos 2 anos)
+    const url = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=200&payment_status=paid`;
+    const r = await fetch(url, {
+      headers: {
+        'Authentication': `bearer ${NS_TOKEN}`,
+        'User-Agent': NS_AGENT,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!r.ok) {
+      console.log('⚠️ Nuvemshop retornou:', r.status);
+      return res.json(resultado);  // Retornar vazio se não conectar
+    }
+
+    const orders = await r.json();
+    if (!Array.isArray(orders)) {
+      return res.json(resultado);
+    }
+
+    // Processar pedidos
+    orders.forEach(order => {
+      if (!order.created_at || !order.total) return;
+
+      const date = new Date(order.created_at);
+      const ano = date.getFullYear();
+      const mes = date.getMonth();  // 0-11
+      const total = parseFloat(order.total) || 0;
+
+      if (ano >= 2024 && ano <= 2026 && mes >= 0 && mes < 12) {
+        resultado.faturamento[ano][mes] += total;
+        resultado.totais[ano] += total;
+      }
+    });
+
+    console.log('✅ Vendas Nuvemshop carregadas:', resultado);
+    res.json(resultado);
+  } catch (e) {
+    console.error('Erro ao buscar vendas Nuvemshop:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ══════════════════════════════════════════════
 // CAPTAÇÃO DE LOJAS — Google Places API Proxy
 // ══════════════════════════════════════════════

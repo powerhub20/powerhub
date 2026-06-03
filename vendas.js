@@ -920,29 +920,43 @@ window.showModule = function(name, el) {
 };
 
 // ============================
-// CARREGAR DADOS DO EXCEL
+// CARREGAR DADOS DO EXCEL OU NUVEMSHOP
 // ============================
 async function loadVendasFromExcel() {
   try {
-    const response = await fetch('/api/vendas/load');
-    if (!response.ok) throw new Error('Erro ao carregar VENDAS.xlsx');
+    // 1. Carregar dados do Excel (histórico)
+    const responseExcel = await fetch('/api/vendas/load');
+    if (responseExcel.ok) {
+      const dataExcel = await responseExcel.json();
+      if (dataExcel.faturamento) Object.assign(VENDAS_DATA.faturamento, dataExcel.faturamento);
+      if (dataExcel.totais) Object.assign(VENDAS_DATA.totais, dataExcel.totais);
+      if (dataExcel.investimentoTotal) Object.assign(VENDAS_DATA.investimentoTotal, dataExcel.investimentoTotal);
+      if (dataExcel.investimento2024) VENDAS_DATA.investimento2024 = dataExcel.investimento2024;
+      if (dataExcel.investimento2025) VENDAS_DATA.investimento2025 = dataExcel.investimento2025;
+      if (dataExcel.investimento2026) VENDAS_DATA.investimento2026 = dataExcel.investimento2026;
+      if (dataExcel.facebook2024) VENDAS_DATA.facebook2024 = dataExcel.facebook2024;
+      if (dataExcel.google2024) VENDAS_DATA.google2024 = dataExcel.google2024;
+      if (dataExcel.roi2024) VENDAS_DATA.roi2024 = dataExcel.roi2024;
+      if (dataExcel.roi2025) VENDAS_DATA.roi2025 = dataExcel.roi2025;
+      if (dataExcel.roi2026) VENDAS_DATA.roi2026 = dataExcel.roi2026;
+    }
 
-    const data = await response.json();
+    // 2. Tentar carregar dados do Nuvemshop (sobrescreve 2026 se estiver conectado)
+    try {
+      const responseNS = await fetch('/api/vendas/nuvemshop');
+      if (responseNS.ok) {
+        const dataNS = await responseNS.json();
+        if (dataNS.faturamento && dataNS.faturamento[2026]) {
+          console.log('✅ Dados do Nuvemshop encontrados! Atualizando 2026...');
+          VENDAS_DATA.faturamento[2026] = dataNS.faturamento[2026];
+          VENDAS_DATA.totais[2026] = dataNS.totais[2026] || 0;
+        }
+      }
+    } catch (e) {
+      // Nuvemshop não conectado, ok usar só Excel
+    }
 
-    // Atualizar VENDAS_DATA com dados do Excel
-    if (data.faturamento) Object.assign(VENDAS_DATA.faturamento, data.faturamento);
-    if (data.totais) Object.assign(VENDAS_DATA.totais, data.totais);
-    if (data.investimentoTotal) Object.assign(VENDAS_DATA.investimentoTotal, data.investimentoTotal);
-    if (data.investimento2024) VENDAS_DATA.investimento2024 = data.investimento2024;
-    if (data.investimento2025) VENDAS_DATA.investimento2025 = data.investimento2025;
-    if (data.investimento2026) VENDAS_DATA.investimento2026 = data.investimento2026;
-    if (data.facebook2024) VENDAS_DATA.facebook2024 = data.facebook2024;
-    if (data.google2024) VENDAS_DATA.google2024 = data.google2024;
-    if (data.roi2024) VENDAS_DATA.roi2024 = data.roi2024;
-    if (data.roi2025) VENDAS_DATA.roi2025 = data.roi2025;
-    if (data.roi2026) VENDAS_DATA.roi2026 = data.roi2026;
-
-    console.log('✅ Dados do Excel carregados com sucesso!', VENDAS_DATA);
+    console.log('✅ Dados carregados!', VENDAS_DATA);
 
     // Atualizar gráficos se módulos estão abertos
     if (document.getElementById('mod-dashboard').style.display !== 'none') {
@@ -952,7 +966,7 @@ async function loadVendasFromExcel() {
       renderVendas();
     }
   } catch (e) {
-    console.warn('⚠️ Não foi possível carregar dados do Excel:', e.message);
+    console.warn('⚠️ Erro ao carregar dados:', e.message);
   }
 }
 
