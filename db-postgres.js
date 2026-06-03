@@ -90,6 +90,8 @@ async function initDatabase() {
       data_contratacao TEXT,
       salario REAL,
       status TEXT,
+      senha TEXT,
+      permissoes TEXT,
       tarefas INTEGER DEFAULT 0,
       concluidas INTEGER DEFAULT 0,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
