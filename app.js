@@ -1157,7 +1157,7 @@ async function saveTarefa() {
     console.log('✅ Tarefa salva com sucesso! ID:', result.id);
 
     closeModal('modalTarefa');
-    clearForm('tarForm');
+    document.getElementById('tarForm')?.reset();
     showToast('Tarefa criada!', 'success');
 
     // Recarregar tarefas do servidor
