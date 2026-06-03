@@ -884,7 +884,7 @@ async function startNuvemshopPolling() {
 // ──────────────────────────────────────────────
 // Static Files — DEVE estar após todas as rotas de API
 // ──────────────────────────────────────────────
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ──────────────────────────────────────────────
 // Start
