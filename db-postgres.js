@@ -170,9 +170,6 @@ function getAll(table, callback) {
     } else {
       callback(result.rows || []);
     }
-  }).catch(err => {
-    console.error(`❌ Erro crítico em getAll ${table}:`, err);
-    callback([]);
   });
 }
 
@@ -184,9 +181,6 @@ function getById(table, id, callback) {
     } else {
       callback(result.rows[0] || null);
     }
-  }).catch(err => {
-    console.error(`❌ Erro crítico em getById:`, err);
-    callback(null);
   });
 }
 
@@ -207,9 +201,6 @@ function insert(table, data, callback) {
       console.log(`✅ Inserido em ${table} com id:`, id);
       callback(id);
     }
-  }).catch(err => {
-    console.error(`❌ Erro crítico em insert:`, err);
-    callback(null);
   });
 }
 
@@ -229,9 +220,6 @@ function update(table, id, data, callback) {
       console.log(`✅ Atualizado ${table} id ${id}`);
       callback(true);
     }
-  }).catch(err => {
-    console.error(`❌ Erro crítico em update:`, err);
-    callback(false);
   });
 }
 
@@ -247,9 +235,6 @@ function remove(table, id, callback) {
       console.log(`✅ Deletado ${table} id ${id}`);
       callback(true);
     }
-  }).catch(err => {
-    console.error(`❌ Erro crítico em remove:`, err);
-    callback(false);
   });
 }
 
