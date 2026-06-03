@@ -1151,7 +1151,10 @@ async function saveTarefa() {
   };
 
   const result = await apiRequest('POST', '/api/tarefas', tarefa);
+  console.log('📝 Resultado POST /api/tarefas:', result);
+
   if (result && result.id) {
+    console.log('✅ Adicionando tarefa ao DB:', result.id);
     DB.tarefas.push({
       id: result.id,
       titulo,
@@ -1163,11 +1166,19 @@ async function saveTarefa() {
       checklist: cl,
       checkDone: cl.map(()=>false)
     });
+    console.log('📊 DB.tarefas agora tem:', DB.tarefas.length, 'tarefas');
+
     closeModal('modalTarefa');
     clearForm('tarForm');
     showToast('Tarefa criada!', 'success');
-    // Garantir que renderKanban execute após atualização
-    setTimeout(() => renderKanban(), 100);
+
+    // Recarregar dados do servidor para garantir sincronização
+    console.log('🔄 Recarregando tarefas do servidor...');
+    getAll('tarefas', (data) => {
+      DB.tarefas = data;
+      console.log('✅ Tarefas recarregadas:', DB.tarefas.length);
+      renderKanban();
+    });
   } else {
     showToast('Erro ao salvar tarefa', 'error');
   }
@@ -1278,11 +1289,19 @@ async function saveFornecedor() {
 async function deleteProduto(id) { if(!confirm('Excluir produto?')) return; await apiRequest('DELETE', `/api/produtos/${id}`); DB.produtos = DB.produtos.filter(p=>p.id!==id); renderEstoque(); showToast('Produto removido','warning'); }
 async function deleteFinanceiro(id) { await apiRequest('DELETE', `/api/financeiro/${id}`); DB.financeiro = DB.financeiro.filter(f=>f.id!==id); renderFinanceiro(); showToast('Transação removida','warning'); }
 async function deleteTarefa(id) {
+  console.log('🗑️ Deletando tarefa:', id);
   const result = await apiRequest('DELETE', `/api/tarefas/${id}`);
-  if (result) {
-    DB.tarefas = DB.tarefas.filter(t=>t.id!==id);
-    showToast('Tarefa removida!', 'warning');
-    setTimeout(() => renderKanban(), 100);
+  console.log('Resultado DELETE:', result);
+
+  if (result && result.ok) {
+    console.log('✅ Tarefa deletada do servidor');
+    // Recarregar dados para sincronizar
+    getAll('tarefas', (data) => {
+      DB.tarefas = data;
+      console.log('✅ Tarefas recarregadas:', DB.tarefas.length);
+      renderKanban();
+      showToast('Tarefa removida!', 'warning');
+    });
   } else {
     showToast('Erro ao deletar tarefa', 'error');
   }
