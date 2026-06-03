@@ -1151,7 +1151,7 @@ async function saveTarefa() {
   };
 
   const result = await apiRequest('POST', '/api/tarefas', tarefa);
-  if (result) {
+  if (result && result.id) {
     DB.tarefas.push({
       id: result.id,
       titulo,
@@ -1165,8 +1165,9 @@ async function saveTarefa() {
     });
     closeModal('modalTarefa');
     clearForm('tarForm');
-    renderKanban();
     showToast('Tarefa criada!', 'success');
+    // Garantir que renderKanban execute após atualização
+    setTimeout(() => renderKanban(), 100);
   } else {
     showToast('Erro ao salvar tarefa', 'error');
   }
@@ -1277,10 +1278,14 @@ async function saveFornecedor() {
 async function deleteProduto(id) { if(!confirm('Excluir produto?')) return; await apiRequest('DELETE', `/api/produtos/${id}`); DB.produtos = DB.produtos.filter(p=>p.id!==id); renderEstoque(); showToast('Produto removido','warning'); }
 async function deleteFinanceiro(id) { await apiRequest('DELETE', `/api/financeiro/${id}`); DB.financeiro = DB.financeiro.filter(f=>f.id!==id); renderFinanceiro(); showToast('Transação removida','warning'); }
 async function deleteTarefa(id) {
-  await apiRequest('DELETE', `/api/tarefas/${id}`);
-  DB.tarefas = DB.tarefas.filter(t=>t.id!==id);
-  renderKanban();
-  showToast('Tarefa removida!', 'warning');
+  const result = await apiRequest('DELETE', `/api/tarefas/${id}`);
+  if (result) {
+    DB.tarefas = DB.tarefas.filter(t=>t.id!==id);
+    showToast('Tarefa removida!', 'warning');
+    setTimeout(() => renderKanban(), 100);
+  } else {
+    showToast('Erro ao deletar tarefa', 'error');
+  }
 }
 async function deleteAviso(id) { await apiRequest('DELETE', `/api/avisos/${id}`); DB.avisos = DB.avisos.filter(a=>a.id!==id); renderAvisos(); showToast('Aviso removido','warning'); }
 async function deleteMeta(id) { await apiRequest('DELETE', `/api/metas/${id}`); DB.metas = DB.metas.filter(m=>m.id!==id); renderMetas(); showToast('Meta removida','warning'); }
