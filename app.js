@@ -1154,31 +1154,17 @@ async function saveTarefa() {
   console.log('📝 Resultado POST /api/tarefas:', result);
 
   if (result && result.id) {
-    console.log('✅ Adicionando tarefa ao DB:', result.id);
-    DB.tarefas.push({
-      id: result.id,
-      titulo,
-      descricao: desc,
-      responsavel: resp,
-      data_limite: data,
-      prioridade,
-      status,
-      checklist: cl,
-      checkDone: cl.map(()=>false)
-    });
-    console.log('📊 DB.tarefas agora tem:', DB.tarefas.length, 'tarefas');
+    console.log('✅ Tarefa salva com sucesso! ID:', result.id);
 
     closeModal('modalTarefa');
     clearForm('tarForm');
     showToast('Tarefa criada!', 'success');
 
-    // Recarregar dados do servidor para garantir sincronização
+    // Recarregar tarefas do servidor
     console.log('🔄 Recarregando tarefas do servidor...');
-    getAll('tarefas', (data) => {
-      DB.tarefas = data;
-      console.log('✅ Tarefas recarregadas:', DB.tarefas.length);
-      renderKanban();
-    });
+    await loadDB();
+    console.log('✅ Tarefas recarregadas:', DB.tarefas.length);
+    renderKanban();
   } else {
     showToast('Erro ao salvar tarefa', 'error');
   }
@@ -1291,17 +1277,16 @@ async function deleteFinanceiro(id) { await apiRequest('DELETE', `/api/financeir
 async function deleteTarefa(id) {
   console.log('🗑️ Deletando tarefa:', id);
   const result = await apiRequest('DELETE', `/api/tarefas/${id}`);
-  console.log('Resultado DELETE:', result);
+  console.log('✅ Resultado DELETE:', result);
 
   if (result && result.ok) {
-    console.log('✅ Tarefa deletada do servidor');
-    // Recarregar dados para sincronizar
-    getAll('tarefas', (data) => {
-      DB.tarefas = data;
-      console.log('✅ Tarefas recarregadas:', DB.tarefas.length);
-      renderKanban();
-      showToast('Tarefa removida!', 'warning');
-    });
+    showToast('Tarefa removida!', 'warning');
+
+    // Recarregar dados do servidor
+    console.log('🔄 Recarregando tarefas...');
+    await loadDB();
+    console.log('✅ Tarefas recarregadas:', DB.tarefas.length);
+    renderKanban();
   } else {
     showToast('Erro ao deletar tarefa', 'error');
   }
