@@ -94,6 +94,8 @@ app.get('/api/nuvemshop/status', (req, res) => {
     configured: !!(NS_STORE_ID && NS_TOKEN),
     storeId: NS_STORE_ID || null,
     appId: NS_APP_ID,
+    hasToken: !!NS_TOKEN,
+    tokenLength: NS_TOKEN ? NS_TOKEN.length : 0
   });
 });
 
