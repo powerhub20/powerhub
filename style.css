@@ -162,6 +162,23 @@ input, select, textarea { font-family: inherit; }
   margin-top: 6px;
 }
 
+.logo-image {
+  width: 120px;
+  height: auto;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.logo-icon-sm-img {
+  width: 40px;
+  height: auto;
+  border-radius: 6px;
+}
+}
+
 .field-group {
   margin-bottom: 18px;
 }
