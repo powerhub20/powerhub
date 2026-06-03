@@ -139,6 +139,12 @@ async function initDatabase() {
       status TEXT,
       data_entrega TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS configuracoes (
+      chave TEXT PRIMARY KEY,
+      valor TEXT,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`
   ];
 
@@ -239,6 +245,37 @@ function remove(table, id, callback) {
 }
 
 // ────────────────────────────────────────────────
+// CONFIGURAÇÕES (para credenciais Nuvemshop, etc)
+// ────────────────────────────────────────────────
+
+function getConfig(chave, callback) {
+  pool.query('SELECT valor FROM configuracoes WHERE chave = $1', [chave], (err, result) => {
+    if (err) {
+      console.error(`❌ Erro ao buscar config ${chave}:`, err.message);
+      callback(null);
+    } else {
+      callback(result.rows[0]?.valor || null);
+    }
+  });
+}
+
+function setConfig(chave, valor, callback) {
+  pool.query(
+    'INSERT INTO configuracoes (chave, valor) VALUES ($1, $2) ON CONFLICT (chave) DO UPDATE SET valor=$2, atualizado_em=CURRENT_TIMESTAMP',
+    [chave, valor],
+    (err) => {
+      if (err) {
+        console.error(`❌ Erro ao salvar config ${chave}:`, err.message);
+        callback(false);
+      } else {
+        console.log(`✅ Config ${chave} salva`);
+        callback(true);
+      }
+    }
+  );
+}
+
+// ────────────────────────────────────────────────
 // EXPORT
 // ────────────────────────────────────────────────
 
@@ -250,4 +287,6 @@ module.exports = {
   insert,
   update,
   remove,
+  getConfig,
+  setConfig,
 };

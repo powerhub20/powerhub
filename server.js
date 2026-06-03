@@ -8,7 +8,7 @@ const fs      = require('fs');
 
 // Usar PostgreSQL se DATABASE_URL existir (Railway), senão SQLite (desenvolvimento)
 const dbModule = process.env.DATABASE_URL ? require('./db-postgres') : require('./db');
-const { initDatabase, getAll, getById, insert, update, remove } = dbModule;
+const { initDatabase, getAll, getById, insert, update, remove, getConfig, setConfig } = dbModule;
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +22,20 @@ if (process.env.DATABASE_URL) {
   console.log('🔌 Conectando ao PostgreSQL...');
   dbModule.initDatabase().then(() => {
     console.log('✅ PostgreSQL inicializado com sucesso!');
+    // Carregar credenciais Nuvemshop salvas
+    if (getConfig) {
+      getConfig('nuvemshop_store_id', (storeId) => {
+        if (storeId) {
+          NS_STORE_ID = storeId;
+          getConfig('nuvemshop_token', (token) => {
+            if (token) {
+              NS_TOKEN = token;
+              console.log(`✅ Nuvemshop carregada do banco! Store: ${NS_STORE_ID}`);
+            }
+          });
+        }
+      });
+    }
   }).catch(err => {
     console.error('❌ ERRO ao inicializar PostgreSQL:', err.message);
   });
@@ -45,12 +59,32 @@ const NS_SECRET    = process.env.NUVEMSHOP_CLIENT_SECRET || '';
 const NS_BASE      = 'https://api.nuvemshop.com.br/v1';
 const NS_AGENT     = 'PowerHub/1.0 (contato@powerropes.com.br)';
 
-// Salvar credenciais via frontend
+// Salvar credenciais via frontend (no banco de dados)
 app.post('/api/nuvemshop/config', (req, res) => {
   const { storeId, token } = req.body;
+
+  // Se for um desconectar
+  if (token === '__CLEAR__') {
+    NS_STORE_ID = '';
+    NS_TOKEN = '';
+    if (setConfig) {
+      setConfig('nuvemshop_store_id', '', () => {});
+      setConfig('nuvemshop_token', '', () => {});
+    }
+    return res.json({ ok: true });
+  }
+
   if (!storeId || !token) return res.status(400).json({ error: 'storeId e token são obrigatórios' });
+
   NS_STORE_ID = storeId;
   NS_TOKEN    = token;
+
+  // Salvar no banco de dados
+  if (setConfig) {
+    setConfig('nuvemshop_store_id', storeId, () => {});
+    setConfig('nuvemshop_token', token, () => {});
+  }
+
   res.json({ ok: true, storeId });
 });
 
@@ -119,6 +153,12 @@ app.get('/api/nuvemshop/callback', async (req, res) => {
     // Salvar credenciais na memória
     NS_STORE_ID = String(storeId);
     NS_TOKEN    = tokenData.access_token;
+
+    // Salvar no banco de dados (persistente)
+    if (setConfig) {
+      setConfig('nuvemshop_store_id', NS_STORE_ID, () => console.log('✅ Store ID salvo no banco'));
+      setConfig('nuvemshop_token', NS_TOKEN, () => console.log('✅ Token salvo no banco'));
+    }
 
     console.log(`✅ Token recebido:`, JSON.stringify(tokenData, null, 2));
 
@@ -801,6 +841,47 @@ app.get('/api/captacao/scrape', async (req, res) => {
 });
 
 // ──────────────────────────────────────────────
+// POLLING AUTOMÁTICO — Sincronizar vendas Nuvemshop a cada 2 minutos
+// ──────────────────────────────────────────────
+async function startNuvemshopPolling() {
+  if (!NS_STORE_ID || !NS_TOKEN) {
+    console.log('⏳ Aguardando Nuvemshop conectar antes de iniciar polling...');
+    setTimeout(startNuvemshopPolling, 30000);  // Tentar novamente em 30s
+    return;
+  }
+
+  console.log('✅ Iniciando polling automático de vendas Nuvemshop (a cada 2 minutos)');
+
+  // Sincronizar a cada 2 minutos
+  setInterval(async () => {
+    if (!NS_STORE_ID || !NS_TOKEN) return;
+
+    try {
+      const url = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=200&payment_status=paid`;
+      const r = await fetch(url, {
+        headers: {
+          'Authentication': `bearer ${NS_TOKEN}`,
+          'User-Agent': NS_AGENT,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!r.ok) {
+        console.warn(`⚠️ Nuvemshop retornou ${r.status}`);
+        return;
+      }
+
+      const orders = await r.json();
+      if (Array.isArray(orders) && orders.length > 0) {
+        console.log(`✅ ${new Date().toLocaleTimeString('pt-BR')} — Sincronizadas ${orders.length} vendas do Nuvemshop`);
+      }
+    } catch (e) {
+      console.error(`❌ Erro no polling Nuvemshop:`, e.message);
+    }
+  }, 120000);  // 120 segundos = 2 minutos
+}
+
+// ──────────────────────────────────────────────
 // Static Files — DEVE estar após todas as rotas de API
 // ──────────────────────────────────────────────
 app.use(express.static(path.join(__dirname)));
@@ -812,6 +893,9 @@ app.listen(PORT, '0.0.0.0', () => {
   const HOST = process.env.RAILWAY_PUBLIC_DOMAIN || `localhost:${PORT}`;
   console.log(`\n🚀 Power Hub rodando em http://${HOST}`);
   console.log(`📦 Nuvemshop API: ${NS_STORE_ID ? '✅ configurada (store '+NS_STORE_ID+')' : '⚠️  não configurada'}`);
-  console.log(`📊 SQLite: ✅ banco de dados inicializado`);
+  console.log(`📊 Banco: ${process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'}`);
   console.log(`\n   Acesse: http://${HOST}\n`);
+
+  // Iniciar polling de Nuvemshop após alguns segundos (tempo para carregar credenciais)
+  setTimeout(startNuvemshopPolling, 5000);
 });
