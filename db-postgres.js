@@ -161,28 +161,34 @@ async function initDatabase() {
 }
 
 // ────────────────────────────────────────────────
-// FUNÇÕES GENÉRICAS (compatível com db.js)
+// FUNÇÕES GENÉRICAS (compatível com db.js - callbacks)
 // ────────────────────────────────────────────────
 
 function getAll(table, callback) {
   pool.query(`SELECT * FROM ${table}`, (err, result) => {
     if (err) {
-      console.error(`Erro ao buscar ${table}:`, err);
+      console.error(`❌ Erro ao buscar ${table}:`, err.message);
       callback([]);
     } else {
       callback(result.rows || []);
     }
+  }).catch(err => {
+    console.error(`❌ Erro crítico em getAll ${table}:`, err);
+    callback([]);
   });
 }
 
 function getById(table, id, callback) {
   pool.query(`SELECT * FROM ${table} WHERE id = $1`, [id], (err, result) => {
     if (err) {
-      console.error(`Erro ao buscar ${table} id ${id}:`, err);
+      console.error(`❌ Erro ao buscar ${table} id ${id}:`, err.message);
       callback(null);
     } else {
       callback(result.rows[0] || null);
     }
+  }).catch(err => {
+    console.error(`❌ Erro crítico em getById:`, err);
+    callback(null);
   });
 }
 
@@ -191,18 +197,22 @@ function insert(table, data, callback) {
   const placeholders = keys.map((_, i) => `$${i + 1}`).join(',');
   const values = Object.values(data);
 
-  pool.query(
-    `INSERT INTO ${table} (${keys.join(',')}) VALUES (${placeholders}) RETURNING id`,
-    values,
-    (err, result) => {
-      if (err) {
-        console.error(`Erro ao inserir em ${table}:`, err);
-        callback(null);
-      } else {
-        callback(result.rows[0].id);
-      }
+  const sql = `INSERT INTO ${table} (${keys.join(',')}) VALUES (${placeholders}) RETURNING id`;
+  console.log(`📝 INSERT ${table}:`, sql.substring(0, 80) + '...');
+
+  pool.query(sql, values, (err, result) => {
+    if (err) {
+      console.error(`❌ Erro ao inserir em ${table}:`, err.message);
+      callback(null);
+    } else {
+      const id = result.rows[0].id;
+      console.log(`✅ Inserido em ${table} com id:`, id);
+      callback(id);
     }
-  );
+  }).catch(err => {
+    console.error(`❌ Erro crítico em insert:`, err);
+    callback(null);
+  });
 }
 
 function update(table, id, data, callback) {
@@ -210,33 +220,39 @@ function update(table, id, data, callback) {
   const sets = keys.map((k, i) => `${k} = $${i + 1}`).join(',');
   const values = [...Object.values(data), id];
 
-  pool.query(
-    `UPDATE ${table} SET ${sets} WHERE id = $${keys.length + 1}`,
-    values,
-    (err) => {
-      if (err) {
-        console.error(`Erro ao atualizar ${table} id ${id}:`, err);
-        callback(false);
-      } else {
-        callback(true);
-      }
+  const sql = `UPDATE ${table} SET ${sets} WHERE id = $${keys.length + 1}`;
+  console.log(`🔄 UPDATE ${table} id ${id}:`, sql.substring(0, 80) + '...');
+
+  pool.query(sql, values, (err) => {
+    if (err) {
+      console.error(`❌ Erro ao atualizar ${table} id ${id}:`, err.message);
+      callback(false);
+    } else {
+      console.log(`✅ Atualizado ${table} id ${id}`);
+      callback(true);
     }
-  );
+  }).catch(err => {
+    console.error(`❌ Erro crítico em update:`, err);
+    callback(false);
+  });
 }
 
 function remove(table, id, callback) {
-  pool.query(
-    `DELETE FROM ${table} WHERE id = $1`,
-    [id],
-    (err) => {
-      if (err) {
-        console.error(`Erro ao deletar ${table} id ${id}:`, err);
-        callback(false);
-      } else {
-        callback(true);
-      }
+  const sql = `DELETE FROM ${table} WHERE id = $1`;
+  console.log(`🗑️ DELETE ${table} id ${id}`);
+
+  pool.query(sql, [id], (err) => {
+    if (err) {
+      console.error(`❌ Erro ao deletar ${table} id ${id}:`, err.message);
+      callback(false);
+    } else {
+      console.log(`✅ Deletado ${table} id ${id}`);
+      callback(true);
     }
-  );
+  }).catch(err => {
+    console.error(`❌ Erro crítico em remove:`, err);
+    callback(false);
+  });
 }
 
 // ────────────────────────────────────────────────
