@@ -56,10 +56,9 @@ async function loadDB() {
     );
 
     results.forEach(({ table, data }) => {
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         DB[table] = data;
       }
-      // Se API retornar vazio, preservar dados hardcoded já carregados
     });
 
     console.log('✅ Dados carregados do SQLite');
@@ -139,12 +138,7 @@ function seedData() {
   ];
 
   // Avisos
-  DB.avisos = [
-    { id:1, tipo:'Chegada de Produto', titulo:'Chegada de novos Whey Proteins', msg:'Chegaram 100 unidades de Whey Protein 900g sabor Baunilha. Já disponível no estoque.', dest:'Todos', prioridade:'normal', data:'2025-06-01' },
-    { id:2, tipo:'Reunião', titulo:'Reunião de Resultados – Sexta 14h', msg:'Reunião com toda a equipe para apresentação dos resultados de maio e metas de junho. Presença obrigatória.', dest:'Todos', prioridade:'importante', data:'2025-06-01' },
-    { id:3, tipo:'Comunicado Geral', titulo:'Novo horário de atendimento', msg:'A partir de segunda-feira o atendimento ao cliente passa a ser das 8h às 20h, incluindo sábado.', dest:'Todos', prioridade:'normal', data:'2025-05-30' },
-    { id:4, tipo:'Treinamento', titulo:'Treinamento Power Hub – Sistema Novo', msg:'Treinamento do novo sistema de gestão acontece na próxima semana. Confira o cronograma no mural.', dest:'Todos', prioridade:'urgente', data:'2025-05-29' },
-  ];
+  DB.avisos = [];
 
   // Metas
   DB.metas = [
