@@ -783,12 +783,32 @@ app.get('/api/vendas/categorias', async (req, res) => {
     // Mapear produtos por ID com suas categorias
     if (Array.isArray(products)) {
       products.forEach(p => {
+        // Extrair categorias (pode ser array de objetos ou strings)
+        let cats = [];
+        if (Array.isArray(p.categories)) {
+          cats = p.categories
+            .map(c => {
+              if (typeof c === 'object' && c !== null) {
+                return c.name || c.pt || '';
+              }
+              return String(c).trim();
+            })
+            .filter(c => c && c.length > 0);
+        }
+
+        // Se não houver categorias, usar o nome do produto
+        if (cats.length === 0) {
+          cats = [p.name || 'Produto'];
+        }
+
         productMap[p.id] = {
           name: p.name,
-          categories: Array.isArray(p.categories) ? p.categories.map(c => c.name || c) : []
+          categories: cats
         };
       });
     }
+
+    console.log('📦 Produtos mapeados:', Object.keys(productMap).length);
 
     // Agregar vendas por categoria
     const categoriaVendas = {};
@@ -811,6 +831,8 @@ app.get('/api/vendas/categorias', async (req, res) => {
         });
       });
     });
+
+    console.log('💰 Categorias com vendas:', Object.keys(categoriaVendas).length);
 
     // Converter para array e ordenar
     let resultado = Object.entries(categoriaVendas)
