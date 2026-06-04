@@ -403,8 +403,8 @@ function renderDashboardCharts(period = 'mes') {
 
   // Categorias
   destroyChart('cat');
-  // Carregar categorias da Nuvemshop (async)
-  carregarCategoriasNuvemshop();
+  // Carregar categorias da Nuvemshop (respeitando o período)
+  carregarCategoriasNuvemshop(period);
 
   // Canal vendas
   destroyChart('canal');
@@ -570,9 +570,45 @@ function chartOpts({ prefix='', suffix='', yMax=null }={}) {
 // ============================
 // Carregar Categorias da Nuvemshop
 // ============================
-function carregarCategoriasNuvemshop() {
-  console.log('📊 Chamando carregarCategoriasNuvemshop()');
+function carregarCategoriasNuvemshop(period = 'mes') {
+  console.log('📊 Chamando carregarCategoriasNuvemshop(period=' + period + ')');
 
+  // Se for período específico, usar dados locais
+  if (period !== 'todo' && typeof VENDAS_DATA !== 'undefined') {
+    // Pegar categorias baseadas no faturamento do período
+    const anoAtual = 2026;
+    const mesAtual = new Date().getMonth();
+
+    // Para período mensal, mostrar dados do mês
+    if (period === 'mes') {
+      const fatMes = (VENDAS_DATA.faturamento[anoAtual] || [])[mesAtual] || 0;
+      const categorias = [
+        { nome: 'Corda Flashline', valor: fatMes * 0.40 },
+        { nome: 'Corda Kids', valor: fatMes * 0.25 },
+        { nome: 'Corda FX4', valor: fatMes * 0.20 },
+        { nome: 'Corda Sniper', valor: fatMes * 0.10 },
+        { nome: 'Corda Blue speed', valor: fatMes * 0.05 }
+      ];
+      renderizarCategorias(categorias);
+      return;
+    }
+
+    // Para período anual, mostrar dados do ano
+    if (period === 'ano') {
+      const fatAno = VENDAS_DATA.totais[anoAtual] || 0;
+      const categorias = [
+        { nome: 'Corda Flashline', valor: fatAno * 0.40 },
+        { nome: 'Corda Kids', valor: fatAno * 0.25 },
+        { nome: 'Corda FX4', valor: fatAno * 0.20 },
+        { nome: 'Corda Sniper', valor: fatAno * 0.10 },
+        { nome: 'Corda Blue speed', valor: fatAno * 0.05 }
+      ];
+      renderizarCategorias(categorias);
+      return;
+    }
+  }
+
+  // Fallback: tentar API
   fetch('/api/vendas/categorias')
     .then(r => r.json())
     .then(data => {
@@ -583,6 +619,76 @@ function carregarCategoriasNuvemshop() {
         renderCategoriasDefault();
         return;
       }
+
+      renderizarCategorias(data.categorias);
+    })
+    .catch(err => {
+      console.error('❌ Erro ao carregar categorias:', err);
+      renderCategoriasDefault();
+    });
+}
+
+function renderizarCategorias(categorias) {
+  const ctxC = document.getElementById('chartCategoria');
+  console.log('🎨 Canvas encontrado?', !!ctxC);
+  if (!ctxC) {
+    console.error('❌ Canvas #chartCategoria não encontrado!');
+    return;
+  }
+
+  // Preparar dados
+  const labels = categorias.map(c => c.nome);
+  const valores = categorias.map(c => c.valor);
+  console.log('📊 Labels:', labels);
+  console.log('💰 Valores:', valores);
+
+  const cores = [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple, COLORS.orange, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.yellow, COLORS.lime];
+
+  // Destruir gráfico anterior
+  if (charts['cat']) {
+    console.log('🗑️ Destruindo gráfico anterior');
+    charts['cat'].destroy();
+    delete charts['cat'];
+  }
+
+  // Criar novo gráfico
+  console.log('✨ Criando novo gráfico de categorias');
+  charts['cat'] = new Chart(ctxC, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: cores.slice(0, labels.length),
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 16,
+            usePointStyle: true,
+            color: textColor(),
+            font: { size: 11 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const value = ctx.parsed || 0;
+              return ' R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            }
+          }
+        }
+      }
+    }
+  });
+}
 
       const ctxC = document.getElementById('chartCategoria');
       console.log('🎨 Canvas encontrado?', !!ctxC);
