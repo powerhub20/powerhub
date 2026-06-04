@@ -1935,7 +1935,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('topbarUser').textContent = roleNames[DB.user.role];
 
       applyPermissions(DB.user.role);
-      seedData();
       initApp();
       console.log('✅ Sessão restaurada para:', DB.user.email);
     } catch (e) {
