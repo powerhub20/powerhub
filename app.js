@@ -572,75 +572,82 @@ function chartOpts({ prefix='', suffix='', yMax=null }={}) {
 // ============================
 function carregarCategoriasNuvemshop() {
   console.log('📊 Chamando carregarCategoriasNuvemshop()');
-  apiRequest('GET', '/api/vendas/categorias', null, (data) => {
-    console.log('📦 Resposta da API de categorias:', data);
 
-    if (!data || !data.categorias || data.categorias.length === 0) {
-      console.log('⚠️ Sem dados de categorias, usando padrão');
-      renderCategoriasDefault();
-      return;
-    }
+  fetch('/api/vendas/categorias')
+    .then(r => r.json())
+    .then(data => {
+      console.log('📦 Resposta da API de categorias:', data);
 
-    const ctxC = document.getElementById('chartCategoria');
-    console.log('🎨 Canvas encontrado?', !!ctxC);
-    if (!ctxC) {
-      console.error('❌ Canvas #chartCategoria não encontrado!');
-      return;
-    }
+      if (!data || !data.categorias || data.categorias.length === 0) {
+        console.log('⚠️ Sem dados de categorias, usando padrão');
+        renderCategoriasDefault();
+        return;
+      }
 
-    // Preparar dados
-    const labels = data.categorias.map(c => c.nome);
-    const valores = data.categorias.map(c => c.valor);
-    console.log('📊 Labels:', labels);
-    console.log('💰 Valores:', valores);
+      const ctxC = document.getElementById('chartCategoria');
+      console.log('🎨 Canvas encontrado?', !!ctxC);
+      if (!ctxC) {
+        console.error('❌ Canvas #chartCategoria não encontrado!');
+        return;
+      }
 
-    const cores = [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple, COLORS.orange, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.yellow, COLORS.lime];
+      // Preparar dados
+      const labels = data.categorias.map(c => c.nome);
+      const valores = data.categorias.map(c => c.valor);
+      console.log('📊 Labels:', labels);
+      console.log('💰 Valores:', valores);
 
-    // Destruir gráfico anterior
-    if (charts['cat']) {
-      console.log('🗑️ Destruindo gráfico anterior');
-      charts['cat'].destroy();
-      delete charts['cat'];
-    }
+      const cores = [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple, COLORS.orange, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.yellow, COLORS.lime];
 
-    // Criar novo gráfico
-    console.log('✨ Criando novo gráfico de categorias');
-    charts['cat'] = new Chart(ctxC, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: valores,
-          backgroundColor: cores.slice(0, labels.length),
-          borderWidth: 0,
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        cutout: '65%',
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 16,
-              usePointStyle: true,
-              color: textColor(),
-              font: { size: 11 }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => {
-                const value = ctx.parsed || 0;
-                return ' R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+      // Destruir gráfico anterior
+      if (charts['cat']) {
+        console.log('🗑️ Destruindo gráfico anterior');
+        charts['cat'].destroy();
+        delete charts['cat'];
+      }
+
+      // Criar novo gráfico
+      console.log('✨ Criando novo gráfico de categorias');
+      charts['cat'] = new Chart(ctxC, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: valores,
+            backgroundColor: cores.slice(0, labels.length),
+            borderWidth: 0,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 16,
+                usePointStyle: true,
+                color: textColor(),
+                font: { size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const value = ctx.parsed || 0;
+                  return ' R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                }
               }
             }
           }
         }
-      }
+      });
+    })
+    .catch(err => {
+      console.error('❌ Erro ao carregar categorias:', err);
+      renderCategoriasDefault();
     });
-  });
 }
 
 // Fallback com dados estáticos
