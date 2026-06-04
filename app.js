@@ -571,28 +571,40 @@ function chartOpts({ prefix='', suffix='', yMax=null }={}) {
 // Carregar Categorias da Nuvemshop
 // ============================
 function carregarCategoriasNuvemshop() {
+  console.log('📊 Chamando carregarCategoriasNuvemshop()');
   apiRequest('GET', '/api/vendas/categorias', null, (data) => {
+    console.log('📦 Resposta da API de categorias:', data);
+
     if (!data || !data.categorias || data.categorias.length === 0) {
-      console.log('⚠️ Sem dados de categorias');
+      console.log('⚠️ Sem dados de categorias, usando padrão');
       renderCategoriasDefault();
       return;
     }
 
     const ctxC = document.getElementById('chartCategoria');
-    if (!ctxC) return;
+    console.log('🎨 Canvas encontrado?', !!ctxC);
+    if (!ctxC) {
+      console.error('❌ Canvas #chartCategoria não encontrado!');
+      return;
+    }
 
     // Preparar dados
     const labels = data.categorias.map(c => c.nome);
     const valores = data.categorias.map(c => c.valor);
+    console.log('📊 Labels:', labels);
+    console.log('💰 Valores:', valores);
+
     const cores = [COLORS.green, COLORS.gold, COLORS.blue, COLORS.purple, COLORS.orange, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.yellow, COLORS.lime];
 
     // Destruir gráfico anterior
     if (charts['cat']) {
+      console.log('🗑️ Destruindo gráfico anterior');
       charts['cat'].destroy();
       delete charts['cat'];
     }
 
     // Criar novo gráfico
+    console.log('✨ Criando novo gráfico de categorias');
     charts['cat'] = new Chart(ctxC, {
       type: 'doughnut',
       data: {
