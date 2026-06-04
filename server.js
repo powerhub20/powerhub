@@ -753,8 +753,9 @@ app.get('/api/vendas/categorias', async (req, res) => {
       'Content-Type': 'application/json',
     };
 
-    // Buscar pedidos pagos com detalhes de produtos (contents = items do pedido)
-    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=500&payment_status=paid`;
+    // Buscar pedidos pagos com detalhes de produtos
+    // Nuvemshop retorna os items em um campo aninhado, não direto em 'contents'
+    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=500&payment_status=paid&expand=items`;
     console.log('📡 Buscando pedidos em:', urlOrders);
     const rOrders = await fetch(urlOrders, { headers });
 
@@ -814,10 +815,18 @@ app.get('/api/vendas/categorias', async (req, res) => {
     const categoriaVendas = {};
 
     orders.forEach(order => {
-      // Nuvemshop usa 'contents' para items do pedido
-      const items = Array.isArray(order.contents) ? order.contents :
-                   (Array.isArray(order.products) ? order.products : []);
+      // Tentar encontrar items em diferentes campos da Nuvemshop
+      let items = [];
 
+      if (Array.isArray(order.items)) {
+        items = order.items;
+      } else if (Array.isArray(order.contents)) {
+        items = order.contents;
+      } else if (Array.isArray(order.products)) {
+        items = order.products;
+      }
+
+      console.log(`📦 Pedido ${order.id}: ${items.length} items`);
       if (items.length === 0) return;
 
       items.forEach(item => {
