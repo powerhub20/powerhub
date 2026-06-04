@@ -218,7 +218,6 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
   document.getElementById('topbarUser').textContent = roleNames[role];
 
   applyPermissions(role);
-  seedData();
   initApp();
   showToast('Bem-vindo ao Power Hub! 🚀', 'success');
 });
