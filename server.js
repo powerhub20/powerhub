@@ -753,8 +753,8 @@ app.get('/api/vendas/categorias', async (req, res) => {
       'Content-Type': 'application/json',
     };
 
-    // Buscar pedidos pagos com detalhes de produtos
-    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=500&payment_status=paid&fields=id,products`;
+    // Buscar pedidos pagos com detalhes de produtos (contents = items do pedido)
+    const urlOrders = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=500&payment_status=paid`;
     console.log('📡 Buscando pedidos em:', urlOrders);
     const rOrders = await fetch(urlOrders, { headers });
 
@@ -814,14 +814,22 @@ app.get('/api/vendas/categorias', async (req, res) => {
     const categoriaVendas = {};
 
     orders.forEach(order => {
-      if (!Array.isArray(order.products)) return;
+      // Nuvemshop usa 'contents' para items do pedido
+      const items = Array.isArray(order.contents) ? order.contents :
+                   (Array.isArray(order.products) ? order.products : []);
 
-      order.products.forEach(item => {
-        const prod = productMap[item.product_id];
+      if (items.length === 0) return;
+
+      items.forEach(item => {
+        const prodId = item.product_id || item.id;
+        const prod = productMap[prodId];
         if (!prod) return;
 
         const categorias = prod.categories.length > 0 ? prod.categories : ['Sem Categoria'];
-        const valor = parseFloat(item.price) * parseInt(item.quantity) || 0;
+        // Price pode estar em 'price' ou 'unit_price'
+        const price = parseFloat(item.price || item.unit_price) || 0;
+        const quantity = parseInt(item.quantity) || 1;
+        const valor = price * quantity;
 
         categorias.forEach(cat => {
           if (!categoriaVendas[cat]) {
