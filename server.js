@@ -738,6 +738,45 @@ app.get('/api/vendas/nuvemshop', async (req, res) => {
 });
 
 // ──────────────────────────────────────────────
+// DEBUG: Ver estrutura do primeiro pedido
+// ──────────────────────────────────────────────
+app.get('/api/vendas/debug-pedido', async (req, res) => {
+  if (!NS_STORE_ID || !NS_TOKEN) {
+    return res.status(401).json({ error: 'Nuvemshop não configurada' });
+  }
+
+  try {
+    const headers = {
+      'Authentication': `bearer ${NS_TOKEN}`,
+      'User-Agent': NS_AGENT,
+      'Content-Type': 'application/json',
+    };
+
+    const url = `${NS_BASE}/${NS_STORE_ID}/orders?per_page=1&payment_status=paid`;
+    const r = await fetch(url, { headers });
+    const orders = await r.json();
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      return res.json({ error: 'Nenhum pedido encontrado', url });
+    }
+
+    const order = orders[0];
+    console.log('🔍 ESTRUTURA DO PRIMEIRO PEDIDO:', JSON.stringify(order, null, 2).substring(0, 1000));
+
+    res.json({
+      id: order.id,
+      fields: Object.keys(order),
+      contentsLength: Array.isArray(order.contents) ? order.contents.length : 'não é array',
+      itemsLength: Array.isArray(order.items) ? order.items.length : 'não existe',
+      firstContent: order.contents ? order.contents[0] : 'vazio',
+      firstItem: order.items ? order.items[0] : 'não existe'
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ──────────────────────────────────────────────
 // Categorias mais vendidas (Nuvemshop)
 // ──────────────────────────────────────────────
 app.get('/api/vendas/categorias', async (req, res) => {
