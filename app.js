@@ -56,9 +56,10 @@ async function loadDB() {
     );
 
     results.forEach(({ table, data }) => {
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         DB[table] = data;
       }
+      // Se API retornar vazio, preservar dados hardcoded já carregados
     });
 
     console.log('✅ Dados carregados do SQLite');
