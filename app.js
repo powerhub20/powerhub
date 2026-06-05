@@ -257,10 +257,23 @@ function logout() {
 }
 
 function applyPermissions(role) {
-  const allowed = ROLE_MODULES[role] || [];
-  document.querySelectorAll('.nav-item[data-roles]').forEach(el => {
-    const roles = el.getAttribute('data-roles').split(',');
-    el.style.display = roles.includes(role) ? '' : 'none';
+  // Se o usuário tem permissões individuais, usar elas; senão, usar o padrão por role
+  let allowed = [];
+
+  if (DB.user.permissoes && typeof DB.user.permissoes === 'object') {
+    // Usar permissões individuais
+    allowed = Object.keys(DB.user.permissoes).filter(key => DB.user.permissoes[key]);
+  } else {
+    // Fallback para ROLE_MODULES (compatibilidade com usuários antigos)
+    allowed = ROLE_MODULES[role] || [];
+  }
+
+  // Mostrar/ocultar módulos baseado nas permissões
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const moduleAttr = el.getAttribute('data-module');
+    if (moduleAttr) {
+      el.style.display = allowed.includes(moduleAttr) ? '' : 'none';
+    }
   });
 }
 
