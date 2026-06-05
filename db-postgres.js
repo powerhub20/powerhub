@@ -158,6 +158,22 @@ async function initDatabase() {
         console.log(`⚠️  Tabela já existe ou erro menor:`, err.message.substring(0, 50));
       }
     }
+
+    // ── Adicionar colunas faltantes (migração) ──
+    const migrations = [
+      `ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS senha TEXT`,
+      `ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS permissoes TEXT`
+    ];
+
+    for (const migration of migrations) {
+      try {
+        await pool.query(migration);
+        console.log(`✅ Migração executada: ${migration.substring(0, 60)}...`);
+      } catch (err) {
+        console.log(`⚠️  Coluna já existe:`, err.message.substring(0, 50));
+      }
+    }
+
     console.log('✅ PostgreSQL iniciado com sucesso!');
     return true;
   } catch (err) {
