@@ -433,6 +433,22 @@ app.get('/api/nuvemshop/dashboard', async (req, res) => {
 
 const TABLES = ['tarefas', 'produtos', 'financeiro', 'avisos', 'metas', 'funcionarios', 'campanhas', 'clientes', 'fornecedores', 'compras'];
 
+// DEBUG: Test insert
+app.post('/api/debug/test-insert', (req, res) => {
+  const testData = {
+    nome: 'TEST_' + Date.now(),
+    email: 'test@test.com',
+    cargo: 'TEST',
+    status: 'Ativo',
+    senha: 'test123',
+    permissoes: JSON.stringify({test: true})
+  };
+
+  insert('funcionarios', testData, (result) => {
+    res.json({ success: !!result.id, result });
+  });
+});
+
 // GET all from table
 TABLES.forEach(table => {
   app.get(`/api/${table}`, (req, res) => {
