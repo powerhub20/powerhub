@@ -428,6 +428,64 @@ app.get('/api/nuvemshop/dashboard', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
+// AUTENTICAÇÃO
+// ══════════════════════════════════════════════
+app.post('/api/login', (req, res) => {
+  const { email, senha } = req.body;
+
+  if (!email || !senha) {
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
+
+  // Buscar funcionário pelo email
+  dbModule.pool.query(
+    'SELECT * FROM funcionarios WHERE email = $1',
+    [email],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao buscar funcionário' });
+      }
+
+      if (!result.rows.length) {
+        return res.status(401).json({ error: 'Email ou senha inválidos' });
+      }
+
+      const funcionario = result.rows[0];
+
+      // Comparar senhas (decodificar de base64)
+      let senhaArmazenada = '';
+      try {
+        senhaArmazenada = Buffer.from(funcionario.senha, 'base64').toString('utf-8');
+      } catch (e) {
+        senhaArmazenada = funcionario.senha;
+      }
+
+      if (senhaArmazenada !== senha) {
+        return res.status(401).json({ error: 'Email ou senha inválidos' });
+      }
+
+      // Decodificar permissões
+      let permissoes = {};
+      try {
+        permissoes = JSON.parse(funcionario.permissoes || '{}');
+      } catch (e) {
+        permissoes = {};
+      }
+
+      // Retornar dados do funcionário
+      res.json({
+        id: funcionario.id,
+        nome: funcionario.nome,
+        email: funcionario.email,
+        cargo: funcionario.cargo,
+        role: funcionario.cargo || 'funcionario',
+        permissoes: permissoes
+      });
+    }
+  );
+});
+
+// ══════════════════════════════════════════════
 // DATABASE API — CRUD para todos os módulos
 // ══════════════════════════════════════════════
 

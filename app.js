@@ -198,28 +198,56 @@ function seedData() {
 // ============================
 // LOGIN
 // ============================
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value;
-  const role  = document.getElementById('loginRole').value;
-  if (!email) return showToast('Preencha o e-mail', 'error');
+  const senha = document.getElementById('loginPass').value;
 
-  const roleNames = { admin:'Administrador', gestor:'Gestor', financeiro:'Financeiro', marketing:'Marketing', estoque:'Estoque', funcionario:'Funcionário' };
-  DB.user = { email, role, name: roleNames[role] };
+  if (!email || !senha) {
+    return showToast('Preencha email e senha', 'error');
+  }
 
-  // Persistir sessão
-  sessionStorage.setItem('userSession', JSON.stringify(DB.user));
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
 
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+    const data = await response.json();
 
-  document.getElementById('sidebarUserName').textContent = roleNames[role];
-  document.getElementById('sidebarUserRole').textContent = role;
-  document.getElementById('topbarUser').textContent = roleNames[role];
+    if (!response.ok) {
+      return showToast(data.error || 'Erro ao fazer login', 'error');
+    }
 
-  applyPermissions(role);
-  initApp();
-  showToast('Bem-vindo ao Power Hub! 🚀', 'success');
+    // Login bem-sucedido
+    DB.user = {
+      id: data.id,
+      email: data.email,
+      nome: data.nome,
+      cargo: data.cargo,
+      role: data.role || data.cargo || 'funcionario',
+      permissoes: data.permissoes
+    };
+
+    // Persistir sessão
+    sessionStorage.setItem('userSession', JSON.stringify(DB.user));
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    document.getElementById('sidebarUserName').textContent = data.nome;
+    document.getElementById('sidebarUserRole').textContent = data.cargo || 'Funcionário';
+    document.getElementById('topbarUser').textContent = data.nome;
+
+    applyPermissions(DB.user.role);
+    await loadDB();
+    initApp();
+    showToast('Bem-vindo ao Power Hub! 🚀', 'success');
+  } catch (err) {
+    console.error('❌ Erro no login:', err);
+    showToast('Erro ao conectar ao servidor', 'error');
+  }
 });
 
 function logout() {
@@ -1921,7 +1949,6 @@ function editProduto(id) {
 // SESSION RESTORATION ON PAGE LOAD
 // ============================
 document.addEventListener('DOMContentLoaded', function() {
-  const roleNames = { admin:'Administrador', gestor:'Gestor', financeiro:'Financeiro', marketing:'Marketing', estoque:'Estoque', funcionario:'Funcionário' };
   const savedSession = sessionStorage.getItem('userSession');
 
   if (savedSession) {
@@ -1930,11 +1957,12 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
 
-      document.getElementById('sidebarUserName').textContent = roleNames[DB.user.role];
-      document.getElementById('sidebarUserRole').textContent = DB.user.role;
-      document.getElementById('topbarUser').textContent = roleNames[DB.user.role];
+      document.getElementById('sidebarUserName').textContent = DB.user.nome;
+      document.getElementById('sidebarUserRole').textContent = DB.user.cargo || 'Funcionário';
+      document.getElementById('topbarUser').textContent = DB.user.nome;
 
       applyPermissions(DB.user.role);
+      loadDB();
       initApp();
       console.log('✅ Sessão restaurada para:', DB.user.email);
     } catch (e) {
