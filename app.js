@@ -343,12 +343,7 @@ async function initApp() {
   // Aguardar carregamento de dados do banco
   await loadDB();
 
-  // Aguardar sincronização com Nuvemshop (se disponível)
-  if (typeof loadVendasFromExcel === 'function') {
-    await loadVendasFromExcel();
-  }
-
-  // Renderizar módulos após dados carregarem
+  // Renderizar módulos imediatamente (não aguardar Nuvemshop)
   renderDashboardCharts('mes');
   updateKPIsByPeriod('mes');
   renderEstoque();
@@ -361,6 +356,15 @@ async function initApp() {
   renderCRM();
   renderCompras();
   buildNotifications();
+
+  // Sincronizar com Nuvemshop em background (não bloqueia UI)
+  if (typeof loadVendasFromExcel === 'function') {
+    loadVendasFromExcel().then(() => {
+      // Após sincronizar, atualizar gráficos e KPIs
+      renderDashboardCharts('mes');
+      updateKPIsByPeriod('mes');
+    });
+  }
 }
 
 // ============================
