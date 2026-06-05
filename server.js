@@ -455,9 +455,14 @@ TABLES.forEach(table => {
 // POST — Insert new
 TABLES.forEach(table => {
   app.post(`/api/${table}`, (req, res) => {
-    insert(table, req.body, (id) => {
-      if (!id) return res.status(400).json({ error: 'Erro ao inserir' });
-      res.json({ id, ...req.body });
+    insert(table, req.body, (result) => {
+      if (result && result.id) {
+        return res.json({ id: result.id, ...req.body });
+      }
+      if (result && result.error) {
+        return res.status(400).json({ error: result.error });
+      }
+      res.status(400).json({ error: 'Erro ao inserir' });
     });
   });
 });

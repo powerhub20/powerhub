@@ -203,11 +203,11 @@ function insert(table, data, callback) {
   pool.query(sql, values, (err, result) => {
     if (err) {
       console.error(`❌ Erro ao inserir em ${table}:`, err.message);
-      callback(null);
+      callback({ error: err.message });
     } else {
       const id = result.rows[0].id;
       console.log(`✅ Inserido em ${table} com id:`, id);
-      callback(id);
+      callback({ id });
     }
   });
 }
