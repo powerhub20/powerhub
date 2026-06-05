@@ -1387,7 +1387,10 @@ async function saveFuncionario() {
     metas: document.getElementById('permMetas')?.checked || false,
     marketing: document.getElementById('permMarketing')?.checked || false,
     crm: document.getElementById('permCRM')?.checked || false,
-    nuvemshop: document.getElementById('permNuvemshop')?.checked || false
+    nuvemshop: document.getElementById('permNuvemshop')?.checked || false,
+    captacao: document.getElementById('permCaptacao')?.checked || false,
+    relatorios: document.getElementById('permRelatorios')?.checked || false,
+    inteligencia: document.getElementById('permInteligencia')?.checked || false
   };
 
   console.log('📝 Salvando funcionário:', nome, email);
