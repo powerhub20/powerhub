@@ -172,46 +172,62 @@
           </div>
         </div>
 
-        <!-- KPI CARDS ROW 1 - EXECUTIVOS -->
+        <!-- KPI CARDS ROW 1 -->
         <div class="kpi-grid">
           <div class="kpi-card green">
-            <div class="kpi-icon"><i class="fas fa-arrow-trend-up"></i></div>
+            <div class="kpi-icon"><i class="fas fa-coins"></i></div>
             <div class="kpi-info">
-              <span class="kpi-label">Crescimento YoY</span>
-              <span class="kpi-value" id="kpi-growth-val">+15,3%</span>
-              <span class="kpi-trend up" id="kpi-growth-trend"><i class="fas fa-check"></i> 2026 vs 2025</span>
-            </div>
-          </div>
-          <div class="kpi-card blue">
-            <div class="kpi-icon"><i class="fas fa-wallet"></i></div>
-            <div class="kpi-info">
-              <span class="kpi-label">Receita YTD</span>
-              <span class="kpi-value" id="kpi-ytd-val">R$ 60.648</span>
-              <span class="kpi-trend up" id="kpi-ytd-trend"><i class="fas fa-calendar"></i> Jan-Jun 2026</span>
+              <span class="kpi-label" id="kpi-dia-label">Faturamento do Dia</span>
+              <span class="kpi-value" id="kpi-dia-val">—</span>
+              <span class="kpi-trend up" id="kpi-dia-trend"><i class="fas fa-calendar"></i> dados da planilha</span>
             </div>
           </div>
           <div class="kpi-card gold">
-            <div class="kpi-icon"><i class="fas fa-boxes-stacked"></i></div>
+            <div class="kpi-icon"><i class="fas fa-calendar-day"></i></div>
             <div class="kpi-info">
-              <span class="kpi-label">Saúde do Estoque</span>
-              <span class="kpi-value" id="kpi-estoque-val">R$ 45.230</span>
-              <span class="kpi-trend neutral" id="kpi-estoque-trend"><i class="fas fa-info-circle"></i> 7 produtos com alerta</span>
+              <span class="kpi-label" id="kpi-mes-label">Faturamento do Mês</span>
+              <span class="kpi-value" id="kpi-mes-val">—</span>
+              <span class="kpi-trend up" id="kpi-mes-trend"><i class="fas fa-arrow-up"></i> carregando...</span>
             </div>
           </div>
-          <div class="kpi-card orange">
-            <div class="kpi-icon"><i class="fas fa-store"></i></div>
+          <div class="kpi-card blue">
+            <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
             <div class="kpi-info">
-              <span class="kpi-label">Loja Física vs E-commerce</span>
-              <span class="kpi-value" id="kpi-canal-val">58% | 42%</span>
-              <span class="kpi-trend up" id="kpi-canal-trend"><i class="fas fa-exchange"></i> split de vendas</span>
+              <span class="kpi-label" id="kpi-anual-label">Faturamento Anual</span>
+              <span class="kpi-value" id="kpi-anual-val">—</span>
+              <span class="kpi-trend up" id="kpi-anual-trend"><i class="fas fa-arrow-up"></i> carregando...</span>
             </div>
           </div>
           <div class="kpi-card purple">
-            <div class="kpi-icon"><i class="fas fa-person-rays"></i></div>
+            <div class="kpi-icon"><i class="fas fa-bullhorn"></i></div>
             <div class="kpi-info">
-              <span class="kpi-label">B2B vs B2C</span>
-              <span class="kpi-value" id="kpi-segment-val">65% | 35%</span>
-              <span class="kpi-trend up" id="kpi-segment-trend"><i class="fas fa-users"></i> receita por segmento</span>
+              <span class="kpi-label" id="kpi-invest-label">Invest. Anúncios (Ano)</span>
+              <span class="kpi-value" id="kpi-invest-val">—</span>
+              <span class="kpi-trend neutral" id="kpi-invest-trend"><i class="fas fa-chart-bar"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card gold">
+            <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Melhor Mês do Ano</span>
+              <span class="kpi-value" id="kpi-melhor-val">—</span>
+              <span class="kpi-trend up" id="kpi-melhor-trend"><i class="fas fa-trophy"></i> carregando...</span>
+            </div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-icon"><i class="fas fa-list-check"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Tarefas Atrasadas</span>
+              <span class="kpi-value">4</span>
+              <span class="kpi-trend down"><i class="fas fa-arrow-up"></i> +2 esta semana</span>
+            </div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-icon"><i class="fas fa-wifi"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-label">Funcionários Online</span>
+              <span class="kpi-value">8</span>
+              <span class="kpi-trend up"><i class="fas fa-circle"></i> ativos agora</span>
             </div>
           </div>
         </div>
@@ -219,28 +235,40 @@
         <!-- CHARTS ROW 1 -->
         <div class="charts-grid-2">
           <div class="chart-card">
-            <div class="chart-header"><h3>Evolução 2025 vs 2026</h3><span class="chart-badge">Comparativo</span></div>
-            <canvas id="chartEvolucao" height="200"></canvas>
+            <div class="chart-header"><h3>Vendas por Mês</h3><span class="chart-badge">2025</span></div>
+            <canvas id="chartVendasMes" height="200"></canvas>
           </div>
           <div class="chart-card">
-            <div class="chart-header"><h3>Top 5 Produtos Mais Vendidos</h3></div>
-            <canvas id="chartTop5Produtos" height="200"></canvas>
+            <div class="chart-header"><h3>Vendas por Categoria</h3></div>
+            <canvas id="chartCategoria" height="200"></canvas>
           </div>
         </div>
 
         <!-- CHARTS ROW 2 -->
         <div class="charts-grid-3">
           <div class="chart-card">
-            <div class="chart-header"><h3>Vendas por Canal</h3><span class="chart-badge">Loja Física vs E-commerce</span></div>
-            <canvas id="chartVendasCanal" height="220"></canvas>
+            <div class="chart-header"><h3>Vendas por Canal</h3></div>
+            <canvas id="chartCanal" height="220"></canvas>
           </div>
           <div class="chart-card">
-            <div class="chart-header"><h3>B2B vs B2C</h3><span class="chart-badge">Receita por Segmento</span></div>
-            <canvas id="chartSegmento" height="220"></canvas>
+            <div class="chart-header"><h3>ROI por Canal</h3></div>
+            <canvas id="chartROICanal" height="220"></canvas>
           </div>
           <div class="chart-card">
-            <div class="chart-header"><h3>Margem de Lucro</h3><span class="chart-badge">Por Canal</span></div>
-            <canvas id="chartMargem" height="220"></canvas>
+            <div class="chart-header"><h3>Meta Ads vs Google Ads</h3></div>
+            <canvas id="chartAds" height="220"></canvas>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW 3 -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header"><h3>Fluxo de Caixa</h3></div>
+            <canvas id="chartFluxo" height="200"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><h3>Crescimento da Empresa</h3></div>
+            <canvas id="chartCrescimento" height="200"></canvas>
           </div>
         </div>
       </section>
