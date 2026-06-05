@@ -349,7 +349,8 @@ async function initApp() {
   }
 
   // Renderizar módulos após dados carregarem
-  renderDashboardCharts();
+  renderDashboardCharts('mes');
+  updateKPIsByPeriod('mes');
   renderEstoque();
   renderFinanceiro();
   renderKanban();
@@ -1843,18 +1844,106 @@ function sendIA() {
 // FILTERS
 // ============================
 function filterDashboard(period) {
-  if (period === 'todo') {
-    // Renderizar gráficos com dados consolidados de todos os anos
-    renderDashboardCharts('todo');
-    updateDashboardKPIsConsolidated();
-    showToast('Mostrando: Todo período (2020-2026)', 'success');
-  } else {
-    // Para outros períodos, usar renderização padrão
-    renderDashboardCharts(period);
-    if (typeof updateDashboardKPIs === 'function') updateDashboardKPIs();
-    const labels = { hoje: 'Hoje', semana: 'Esta semana', mes: 'Este mês', ano: 'Este ano' };
-    showToast('Período: ' + (labels[period] || period), 'info');
+  // Renderizar gráficos
+  renderDashboardCharts(period);
+
+  // Atualizar KPIs baseado no período
+  updateKPIsByPeriod(period);
+
+  const labels = {
+    hoje: 'Hoje',
+    semana: 'Esta semana',
+    mes: 'Este mês',
+    ano: 'Este ano',
+    todo: 'Todo período (2020-2026)'
+  };
+  showToast('Período: ' + (labels[period] || period), 'info');
+}
+
+function updateKPIsByPeriod(period = 'mes') {
+  if (typeof VENDAS_DATA === 'undefined') return;
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth(); // 0-11
+
+  let totalFaturamento = 0;
+  let totalInvestimento = 0;
+  let label1 = 'Faturamento';
+  let label2 = 'Investimento';
+
+  // Calcular baseado no período
+  if (period === 'hoje') {
+    // Mostrar faturamento e investimento do dia (não temos dados granulares por dia)
+    const faturamentoHoje = (VENDAS_DATA.faturamento[currentYear] || [])[currentMonth] || 0;
+    totalFaturamento = faturamentoHoje / 30; // Aproximação
+    totalInvestimento = 0;
+    label1 = 'Faturamento Hoje (aprox.)';
+    label2 = 'Dia Atual';
+  } else if (period === 'semana') {
+    totalFaturamento = (VENDAS_DATA.faturamento[currentYear] || [])[currentMonth] || 0;
+    totalInvestimento = (VENDAS_DATA.investimento2026 || [])[currentMonth] || 0;
+    label1 = 'Faturamento Semana';
+    label2 = 'Esta Semana';
+  } else if (period === 'mes') {
+    // Faturamento e investimento do mês atual
+    totalFaturamento = (VENDAS_DATA.faturamento[currentYear] || [])[currentMonth] || 0;
+    const invKey = `investimento${currentYear}`;
+    totalInvestimento = (VENDAS_DATA[invKey] || [])[currentMonth] || 0;
+    label1 = 'Faturamento Mês';
+    label2 = 'Investimento Mês';
+  } else if (period === 'ano') {
+    // Faturamento e investimento até agora no ano
+    const faturamentoCheio = VENDAS_DATA.totais[currentYear] || 0;
+    const faturamentoPorMes = (VENDAS_DATA.faturamento[currentYear] || []).slice(0, currentMonth + 1);
+    totalFaturamento = faturamentoPorMes.reduce((s, v) => s + v, 0);
+
+    const invKey = `investimento${currentYear}`;
+    const investmentoPorMes = (VENDAS_DATA[invKey] || []).slice(0, currentMonth + 1);
+    totalInvestimento = investmentoPorMes.reduce((s, v) => s + v, 0);
+    label1 = 'Faturamento YTD';
+    label2 = 'Investimento YTD';
+  } else if (period === 'todo') {
+    // Todos os anos (consolidado)
+    const anos = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+    totalFaturamento = anos.reduce((sum, a) => sum + (VENDAS_DATA.totais[a] || 0), 0);
+    totalInvestimento = anos.reduce((sum, a) => {
+      const invKey = `investimento${a}`;
+      const invArray = VENDAS_DATA[invKey] || [];
+      return sum + invArray.reduce((s, v) => s + v, 0);
+    }, 0);
+    label1 = 'Faturamento Total';
+    label2 = 'Investimento Total';
   }
+
+  // Atualizar KPIs no DOM
+  setKPI('kpi-dia-label', label1);
+  setKPI('kpi-dia-val', 'R$ ' + totalFaturamento.toLocaleString('pt-BR'));
+  setKPI('kpi-dia-trend', '<i class="fas fa-chart-line"></i> ' + label2);
+
+  setKPI('kpi-mes-label', label2);
+  setKPI('kpi-mes-val', 'R$ ' + totalInvestimento.toLocaleString('pt-BR'));
+  const roi = totalInvestimento > 0 ? (totalFaturamento / totalInvestimento).toFixed(2) : '∞';
+  setKPI('kpi-mes-trend', '<i class="fas fa-percent"></i> ROI: ' + roi);
+
+  // Outros KPIs
+  const anos = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+  const totalTodo = anos.reduce((sum, a) => sum + (VENDAS_DATA.totais[a] || 0), 0);
+  setKPI('kpi-anual-label', 'Período: ' + (period === 'todo' ? '2020-2026' : currentYear));
+  setKPI('kpi-anual-val', 'R$ ' + totalTodo.toLocaleString('pt-BR'));
+
+  let melhorAno = 2020;
+  let melhorVal = VENDAS_DATA.totais[2020] || 0;
+  anos.forEach(a => {
+    if ((VENDAS_DATA.totais[a] || 0) > melhorVal) {
+      melhorVal = VENDAS_DATA.totais[a];
+      melhorAno = a;
+    }
+  });
+
+  setKPI('kpi-invest-label', 'Melhor Ano');
+  setKPI('kpi-invest-val', String(melhorAno));
+  setKPI('kpi-invest-trend', '<i class="fas fa-trophy"></i> R$ ' + melhorVal.toLocaleString('pt-BR'));
 }
 
 function updateDashboardKPIsConsolidated() {
@@ -1864,7 +1953,11 @@ function updateDashboardKPIsConsolidated() {
   // Calcular totais consolidados
   const anos = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
   const totalFaturamento = anos.reduce((sum, a) => sum + (VENDAS_DATA.totais[a] || 0), 0);
-  const totalInvestimento = anos.reduce((sum, a) => sum + (VENDAS_DATA.investimentoTotal[a] || 0), 0);
+  const totalInvestimento = anos.reduce((sum, a) => {
+    const invKey = `investimento${a}`;
+    const invArray = VENDAS_DATA[invKey] || [];
+    return sum + invArray.reduce((s, v) => s + v, 0);
+  }, 0);
 
   // Calcular ROI médio
   const roiMedio = (totalFaturamento > 0 && totalInvestimento > 0)
