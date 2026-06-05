@@ -242,7 +242,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     applyPermissions(DB.user.role);
     await loadDB();
-    initApp();
+    await initApp();
     showToast('Bem-vindo ao Power Hub! 🚀', 'success');
   } catch (err) {
     console.error('❌ Erro no login:', err);
@@ -339,8 +339,16 @@ function toggleTheme() {
 // ============================
 // INIT APP
 // ============================
-function initApp() {
-  loadDB();
+async function initApp() {
+  // Aguardar carregamento de dados do banco
+  await loadDB();
+
+  // Aguardar sincronização com Nuvemshop (se disponível)
+  if (typeof loadVendasFromExcel === 'function') {
+    await loadVendasFromExcel();
+  }
+
+  // Renderizar módulos após dados carregarem
   renderDashboardCharts();
   renderEstoque();
   renderFinanceiro();
@@ -1964,7 +1972,7 @@ function editProduto(id) {
 // ============================
 // SESSION RESTORATION ON PAGE LOAD
 // ============================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const savedSession = sessionStorage.getItem('userSession');
 
   if (savedSession) {
@@ -1978,8 +1986,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('topbarUser').textContent = DB.user.nome;
 
       applyPermissions(DB.user.role);
-      loadDB();
-      initApp();
+      await loadDB();
+      await initApp();
       console.log('✅ Sessão restaurada para:', DB.user.email);
     } catch (e) {
       console.error('Erro ao restaurar sessão:', e);
