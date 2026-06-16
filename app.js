@@ -565,7 +565,7 @@ function renderDashboardCharts(period = 'mes') {
   if (ctxG && typeof VENDAS_DATA !== 'undefined') {
     const anoAtual = 2026;
     const mesAtual = 5; // Maio (0-indexed seria 4, mas aqui é 1-indexed)
-    const anos = [2022, 2023, 2024, 2025, 2026];
+    const anos = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
     const crescimentos = anos.map(ano => {
       const anoAnterior = ano - 1;
