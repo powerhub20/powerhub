@@ -1335,7 +1335,8 @@ async function saveTarefa() {
     prioridade,
     status,
     checklist: JSON.stringify(cl),
-    checkDone: JSON.stringify(cl.map(()=>false))
+    checkDone: JSON.stringify(cl.map(()=>false)),
+    criado_por: DB.user?.nome || 'Sistema'
   };
 
   const result = await apiRequest('POST', '/api/tarefas', tarefa);
@@ -1362,7 +1363,7 @@ async function saveAviso() {
   const tipo=val('avisoTipo'), titulo=val('avisoTitulo'), msg=val('avisoMsg'), dest=val('avDest'), prioridade=val('avPrioridade');
   if (!titulo || !msg) return showToast('Preencha título e mensagem', 'error');
 
-  const aviso = { tipo, titulo, mensagem: msg, destinatario: dest, prioridade, data: new Date().toISOString().slice(0,10) };
+  const aviso = { tipo, titulo, mensagem: msg, destinatario: dest, prioridade, data: new Date().toISOString().slice(0,10), criado_por: DB.user?.nome || 'Sistema' };
   const result = await apiRequest('POST', '/api/avisos', aviso);
   if (result) {
     DB.avisos.unshift({ id: result.id, tipo, titulo, msg, dest, prioridade, data: new Date().toISOString().slice(0,10) });
@@ -1377,7 +1378,7 @@ async function saveMeta() {
   const tipo=val('metaTipo'), titulo=val('metaTitulo'), valor=parseFloat(val('metaValor')), atual=parseFloat(val('metaAtual')||0), prazo=val('metaPrazo'), resp=val('metaResp');
   if (!titulo || !valor) return showToast('Preencha todos os campos', 'error');
 
-  const meta = { tipo, titulo, valor, valor_atual: atual, prazo, responsavel: resp };
+  const meta = { tipo, titulo, valor, valor_atual: atual, prazo, responsavel: resp, criado_por: DB.user?.nome || 'Sistema' };
   const result = await apiRequest('POST', '/api/metas', meta);
   if (result) {
     DB.metas.push({ id: result.id, tipo, titulo, valor, atual, prazo, resp });
