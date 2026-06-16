@@ -252,9 +252,9 @@ function rowLead(l) {
     </td>
     <td>
       ${l.whatsapp
-        ? `<button class="btn-icon" onclick="abrirWhatsAppERegistrar('${l.whatsapp}', '${l.nome.replace(/'/g, "\\'")}', '${l.placeId}', '${l.endereco.replace(/'/g, "\\'")}'); return false;" style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);color:#25D366;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer">
+        ? `<a href="javascript:void(0)" onclick="abrirWhatsAppERegistrar('${l.whatsapp}', '${l.nome.replace(/'/g, "\\'")}', '${l.placeId}', '${l.endereco.replace(/'/g, "\\'")}'); return false;" style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);color:#25D366;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer">
              <i class="fab fa-whatsapp"></i> Abrir
-           </button>`
+           </a>`
         : (l.detalhesCarregados
             ? `<span style="color:var(--text-3);font-size:11px">—</span>`
             : `<span style="color:var(--text-3);font-size:11px"><i class="fas fa-spinner fa-spin" style="font-size:9px"></i></span>`)}
