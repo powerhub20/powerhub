@@ -345,7 +345,7 @@ async function initApp() {
 
   // Renderizar módulos imediatamente (não aguardar Nuvemshop)
   renderDashboardCharts('mes');
-  updateKPIsByPeriod('mes');
+  // Não atualizar KPIs aqui, aguardar sincronização com Nuvemshop para dados corretos
   renderEstoque();
   renderFinanceiro();
   renderKanban();
@@ -360,10 +360,13 @@ async function initApp() {
   // Sincronizar com Nuvemshop em background (não bloqueia UI)
   if (typeof loadVendasFromExcel === 'function') {
     loadVendasFromExcel().then(() => {
-      // Após sincronizar, atualizar gráficos e KPIs
+      // Após sincronizar, atualizar gráficos e KPIs com dados corretos
       renderDashboardCharts('mes');
       updateKPIsByPeriod('mes');
     });
+  } else {
+    // Se não houver sincronização, atualizar KPIs com dados existentes
+    updateKPIsByPeriod('mes');
   }
 }
 
