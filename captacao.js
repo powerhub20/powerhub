@@ -564,6 +564,105 @@ async function abrirWhatsAppERegistrar(whatsapp, nomeLoja, placeId, endereco) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ============================
+// RELATÓRIO COMPLETO DE CONTATOS (ADMIN)
+// ============================
+async function renderRelatorioContatos() {
+  const container = document.getElementById('capRelatorioContatos');
+  if (!container) return;
+
+  try {
+    const contatos = await fetch('/api/contatos_captacao').then(r => r.json());
+
+    if (!contatos || contatos.length === 0) {
+      document.getElementById('tbodyRelatorioContatos').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-3)">Nenhum contato registrado</td></tr>';
+      return;
+    }
+
+    // Preencher filtro de usuários
+    const usuariosUnicos = [...new Set(contatos.map(c => c.usuario_contato))];
+    const selectUsuario = document.getElementById('capRelatorioFiltroUsuario');
+    const usuariosExistentes = Array.from(selectUsuario.querySelectorAll('option')).map(o => o.value).filter(v => v !== '');
+
+    usuariosUnicos.forEach(usuario => {
+      if (!usuariosExistentes.includes(usuario)) {
+        const option = document.createElement('option');
+        option.value = usuario;
+        option.textContent = usuario;
+        selectUsuario.appendChild(option);
+      }
+    });
+
+    // Filtrar por usuário se selecionado
+    const usuarioFiltro = selectUsuario.value;
+    let contatosFiltrados = contatos;
+    if (usuarioFiltro) {
+      contatosFiltrados = contatos.filter(c => c.usuario_contato === usuarioFiltro);
+    }
+
+    // Renderizar tabela
+    const tbody = document.getElementById('tbodyRelatorioContatos');
+    tbody.innerHTML = contatosFiltrados.map(c => {
+      const dataFormatada = c.data_contato ? new Date(c.data_contato).toLocaleString('pt-BR') : '—';
+      const waLink = c.whatsapp_numero ? `https://wa.me/${c.whatsapp_numero.replace(/\D/g, '')}` : null;
+      return `<tr>
+        <td style="font-weight:500">${c.nome_loja}</td>
+        <td style="color:var(--gold)">${c.usuario_contato}</td>
+        <td>${c.whatsapp_numero ? `<a href="${waLink}" target="_blank" style="color:#25D366"><i class="fab fa-whatsapp"></i> ${c.whatsapp_numero}</a>` : '—'}</td>
+        <td style="font-size:11px;max-width:200px">${c.endereco || '—'}</td>
+        <td style="font-size:11px;color:var(--text-2)">${dataFormatada}</td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn-icon" onclick="navigator.clipboard.writeText('${c.whatsapp_numero || ''}')" title="Copiar WhatsApp"><i class="fas fa-copy"></i></button>
+            <button class="btn-icon del" onclick="deleteContatoCaptacao(${c.id})"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    container.style.display = 'block';
+  } catch (e) {
+    console.error('Erro ao carregar relatório:', e);
+  }
+}
+
+async function deleteContatoCaptacao(id) {
+  if (!confirm('Remover este contato?')) return;
+  const result = await apiRequest('DELETE', `/api/contatos_captacao/${id}`);
+  if (result) {
+    showToast('Contato removido', 'warning');
+    renderRelatorioContatos();
+  }
+}
+
+function exportarRelatorioContatos() {
+  const contatos = [];
+  document.querySelectorAll('#tbodyRelatorioContatos tr').forEach(row => {
+    const tds = row.querySelectorAll('td');
+    if (tds.length >= 5) {
+      contatos.push([
+        tds[0].textContent.trim(),
+        tds[1].textContent.trim(),
+        tds[2].textContent.trim(),
+        tds[3].textContent.trim(),
+        tds[4].textContent.trim(),
+      ]);
+    }
+  });
+
+  if (!contatos.length) return showToast('Nenhum contato para exportar', 'warning');
+
+  const header = ['Loja', 'Usuário', 'WhatsApp', 'Endereço', 'Data/Hora'];
+  const csv = [header.join(';'), ...contatos.map(r => r.map(cell => `"${cell}"`).join(';'))].join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `relatorio_contatos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.csv`;
+  a.click();
+  showToast('Relatório exportado!', 'success');
+}
+
+// ============================
 // RESUMO DE CONTATOS POR USUÁRIO
 // ============================
 async function renderResumoContatosPorUsuario() {
@@ -615,7 +714,10 @@ window.showModule = function(name, el) {
   _origShowModuleCap(name, el);
   if (name === 'captacao') {
     initCaptacao();
-    setTimeout(renderResumoContatosPorUsuario, 100);
+    setTimeout(() => {
+      renderResumoContatosPorUsuario();
+      renderRelatorioContatos();
+    }, 100);
   }
 };
 
