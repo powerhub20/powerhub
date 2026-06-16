@@ -1107,15 +1107,21 @@ function renderMarketing() {
 // CRM
 // ============================
 function renderCRM() {
-  // Funil
+  // Funil - Calcular dinamicamente baseado em DB.clientes
   const funil = document.getElementById('funilStages');
   if (funil) {
+    const novoLead = DB.clientes.filter(c => c.estagio === 'Novo Lead').length;
+    const contato = DB.clientes.filter(c => c.estagio === 'Contato').length;
+    const proposta = DB.clientes.filter(c => c.estagio === 'Proposta').length;
+    const negociacao = DB.clientes.filter(c => c.estagio === 'Negociação').length;
+    const cliente = DB.clientes.filter(c => c.estagio === 'Cliente').length;
+
     const stages = [
-      { label:'Novo Lead', count:18, value:'R$ 8.200' },
-      { label:'Contato', count:12, value:'R$ 5.400' },
-      { label:'Proposta', count:8, value:'R$ 4.100' },
-      { label:'Negociação', count:5, value:'R$ 2.800' },
-      { label:'Cliente', count:3, value:'R$ 1.890' },
+      { label:'Novo Lead', count: novoLead, value:'R$ 0' },
+      { label:'Contato', count: contato, value:'R$ 0' },
+      { label:'Proposta', count: proposta, value:'R$ 0' },
+      { label:'Negociação', count: negociacao, value:'R$ 0' },
+      { label:'Cliente', count: cliente, value:'R$ 0' },
     ];
     funil.innerHTML = stages.map(s => `
       <div class="funil-stage">

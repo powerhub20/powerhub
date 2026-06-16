@@ -385,46 +385,63 @@ function salvarLeadCRM() {
   closeModal('modalLeadDetalhe');
 }
 
-function salvarLeadCRMDireto(id) {
+async function salvarLeadCRMDireto(id) {
   const l = CAP.leads.find(x => x.id === id);
   if (!l || !window.DB) return;
 
   const existe = DB.clientes.find(c => c.nome === l.nome);
-  if (!existe) {
-    DB.clientes.push({
-      id:           Date.now(),
-      tipo:         'Lead',
-      nome:         l.nome,
-      email:        l.email || '',
-      tel:          l.telefone || '',
-      origem:       'Google Maps',
-      estagio:      'Novo Lead',
-      obs:          `Endereço: ${l.endereco}${l.whatsapp ? ' | WhatsApp: +'+l.whatsapp : ''}${l.site ? ' | Site: '+l.site : ''}`,
-      compras:      0,
-      totalGasto:   0,
-      ultimaCompra: '—',
-      _whatsapp:    l.whatsapp || '',
-      _googleMaps:  l.googleUrl,
-    });
+  if (existe) {
+    showToast(`"${l.nome}" já existe no CRM!`, 'warning');
+    return;
   }
 
-  l.salvoNoCRM = true;
-  atualizarLinhaLead(l);
-  atualizarKPIs();
-  showToast(`"${l.nome}" salvo no CRM!`, 'success');
+  const cliente = {
+    tipo:         'Lead',
+    nome:         l.nome,
+    email:        l.email || '',
+    telefone:     l.telefone || '',
+    origem:       'Captação Lojas',
+    estagio:      'Contato',
+    observacoes:  `Endereço: ${l.endereco}${l.whatsapp ? ' | WhatsApp: +'+l.whatsapp : ''}${l.site ? ' | Site: '+l.site : ''}`
+  };
+
+  const result = await apiRequest('POST', '/api/clientes', cliente);
+  if (result) {
+    DB.clientes.push({
+      id:           result.id,
+      ...cliente,
+      tel:          cliente.telefone,
+      obs:          cliente.observacoes,
+      compras:      0,
+      totalGasto:   0,
+      ultimaCompra: '—'
+    });
+    l.salvoNoCRM = true;
+    atualizarLinhaLead(l);
+    atualizarKPIs();
+    renderCRM();
+    showToast(`"${l.nome}" salvo no CRM!`, 'success');
+  }
 }
 
-function salvarSelecionadosCRM() {
+async function salvarSelecionadosCRM() {
+  const ids = Array.from(CAP.selectedIds);
+  if (!ids.length) return showToast('Selecione ao menos uma loja', 'warning');
+
   let count = 0;
-  CAP.selectedIds.forEach(id => {
+  for (const id of ids) {
     const l = CAP.leads.find(x => x.id === id);
-    if (l && !l.salvoNoCRM) { salvarLeadCRMDireto(id); count++; }
-  });
+    if (l && !l.salvoNoCRM) {
+      await salvarLeadCRMDireto(id);
+      count++;
+      await delay(300);
+    }
+  }
   CAP.selectedIds.clear();
   document.querySelectorAll('#tbodyCaptacao input[type=checkbox]').forEach(c => c.checked = false);
-  document.getElementById('capSelectAll').checked = false;
+  if (document.getElementById('capSelectAll')) document.getElementById('capSelectAll').checked = false;
   atualizarBotoesSelecao();
-  showToast(`${count} lojas salvas no CRM!`, 'success');
+  if (count > 0) showToast(`${count} loja(s) salva(s) no CRM!`, 'success');
 }
 
 // ============================
