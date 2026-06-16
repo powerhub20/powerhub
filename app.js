@@ -1366,7 +1366,7 @@ async function saveAviso() {
   const aviso = { tipo, titulo, mensagem: msg, destinatario: dest, prioridade, data: new Date().toISOString().slice(0,10), criado_por: DB.user?.nome || 'Sistema' };
   const result = await apiRequest('POST', '/api/avisos', aviso);
   if (result) {
-    DB.avisos.unshift({ id: result.id, tipo, titulo, msg, dest, prioridade, data: new Date().toISOString().slice(0,10) });
+    DB.avisos.unshift({ id: result.id, tipo, titulo, msg, dest, prioridade, data: new Date().toISOString().slice(0,10), criado_por: DB.user?.nome || 'Sistema' });
     closeModal('modalAviso');
     renderAvisos();
     showToast('Aviso publicado!', 'success');
