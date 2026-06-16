@@ -1949,6 +1949,14 @@ function updateKPIsByPeriod(period = 'mes') {
   setKPI('kpi-invest-label', 'Melhor Ano');
   setKPI('kpi-invest-val', String(melhorAno));
   setKPI('kpi-invest-trend', '<i class="fas fa-trophy"></i> R$ ' + melhorVal.toLocaleString('pt-BR'));
+
+  // Calcular investimento total em anúncios
+  const investimentoTotalAnuncios = anos.reduce((sum, a) => {
+    const invKey = `investimento${a}`;
+    const invArray = VENDAS_DATA[invKey] || [];
+    return sum + invArray.reduce((s, v) => s + v, 0);
+  }, 0);
+  setKPI('kpi-invest-anuncios', 'R$ ' + investimentoTotalAnuncios.toLocaleString('pt-BR'));
 }
 
 function updateDashboardKPIsConsolidated() {
