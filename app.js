@@ -885,7 +885,7 @@ function renderKanban() {
           <button class="btn-icon-delete" onclick="event.stopPropagation(); if(confirm('Excluir tarefa?')) deleteTarefa(${t.id})" title="Excluir tarefa"><i class="fas fa-trash"></i></button>
         </div>
         <div class="card-meta">
-          <span class="card-resp"><i class="fas fa-user"></i> ${t.resp}</span>
+          <span class="card-resp"><i class="fas fa-user"></i> ${t.criado_por || t.resp || 'Sistema'}</span>
           <span class="priority-badge ${t.prioridade}">${t.prioridade}</span>
         </div>
         <div class="card-meta" style="margin-top:6px">
@@ -933,8 +933,8 @@ function renderAvisos() {
       <div class="aviso-titulo">${a.titulo}</div>
       <div class="aviso-msg">${a.msg}</div>
       <div class="aviso-footer">
+        <span><i class="fas fa-user"></i> ${a.criado_por || 'Sistema'}</span>
         <span><i class="fas fa-calendar"></i> ${a.data}</span>
-        <span><i class="fas fa-users"></i> ${a.dest}</span>
         <span class="status-badge ${a.prioridade}">${a.prioridade}</span>
         <button class="btn-icon del" onclick="deleteAviso(${a.id})"><i class="fas fa-trash"></i></button>
       </div>
@@ -955,7 +955,7 @@ function renderMetas() {
     const fmt = v => typeof v === 'number' && v > 100 ? 'R$ ' + v.toLocaleString('pt-BR') : v + (v < 100 ? (m.tipo==='ROI'?'%':'') : '');
     return `<div class="meta-card">
       <div class="meta-header">
-        <div><div class="meta-title">${m.titulo}</div><div class="meta-resp"><i class="fas fa-user"></i> ${m.resp}</div></div>
+        <div><div class="meta-title">${m.titulo}</div><div class="meta-resp"><i class="fas fa-user"></i> ${m.criado_por || m.resp || 'Sistema'}</div></div>
         <span class="meta-type-badge ${m.tipo.toLowerCase()}">${m.tipo}</span>
       </div>
       <div class="meta-values">
