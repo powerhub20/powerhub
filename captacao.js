@@ -252,9 +252,9 @@ function rowLead(l) {
     </td>
     <td>
       ${l.whatsapp
-        ? `<a href="https://wa.me/${l.whatsapp}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);color:#25D366;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;text-decoration:none">
+        ? `<button class="btn-icon" onclick="abrirWhatsAppERegistrar('${l.whatsapp}', '${l.nome.replace(/'/g, "\\'")}', '${l.placeId}', '${l.endereco.replace(/'/g, "\\'")}'); return false;" style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);color:#25D366;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer">
              <i class="fab fa-whatsapp"></i> Abrir
-           </a>`
+           </button>`
         : (l.detalhesCarregados
             ? `<span style="color:var(--text-3);font-size:11px">—</span>`
             : `<span style="color:var(--text-3);font-size:11px"><i class="fas fa-spinner fa-spin" style="font-size:9px"></i></span>`)}
@@ -532,9 +532,80 @@ function limparResultados() {
 }
 
 // ============================
+// REGISTRAR CONTATO VIA WHATSAPP
+// ============================
+async function abrirWhatsAppERegistrar(whatsapp, nomeLoja, placeId, endereco) {
+  if (!window.DB?.user?.nome) {
+    showToast('Erro: usuário não identificado', 'error');
+    return;
+  }
+
+  const contato = {
+    place_id: placeId,
+    nome_loja: nomeLoja,
+    usuario_contato: DB.user.nome,
+    whatsapp_numero: whatsapp,
+    endereco: endereco
+  };
+
+  // Registrar no banco de dados
+  const result = await apiRequest('POST', '/api/contatos_captacao', contato);
+  if (result) {
+    showToast(`Contato registrado para ${DB.user.nome}!`, 'info');
+  }
+
+  // Abrir WhatsApp
+  window.open(`https://wa.me/${whatsapp}`, '_blank');
+}
+
+// ============================
 // UTILS
 // ============================
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ============================
+// RESUMO DE CONTATOS POR USUÁRIO
+// ============================
+async function renderResumoContatosPorUsuario() {
+  const container = document.getElementById('capResumoContatosUsuarios');
+  if (!container) return;
+
+  try {
+    const contatos = await fetch('/api/contatos_captacao').then(r => r.json());
+
+    // Agrupar por usuário
+    const porUsuario = {};
+    contatos.forEach(c => {
+      if (!porUsuario[c.usuario_contato]) {
+        porUsuario[c.usuario_contato] = 0;
+      }
+      porUsuario[c.usuario_contato]++;
+    });
+
+    if (Object.keys(porUsuario).length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-3)">Nenhum contato registrado ainda</div>';
+      return;
+    }
+
+    const usuarios = Object.entries(porUsuario)
+      .sort((a, b) => b[1] - a[1])
+      .map(([usuario, count]) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-2);border-radius:6px;margin-bottom:8px">
+          <span style="font-weight:500">${usuario}</span>
+          <span style="background:var(--green);color:white;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600">${count}</span>
+        </div>
+      `).join('');
+
+    container.innerHTML = `
+      <div style="padding:16px;background:var(--bg-1);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text)">📊 Contatos por Usuário</div>
+        ${usuarios}
+      </div>
+    `;
+  } catch (e) {
+    console.error('Erro ao carregar resumo:', e);
+  }
+}
 
 // ============================
 // HOOK DE MÓDULO
@@ -542,7 +613,10 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 const _origShowModuleCap = window.showModule;
 window.showModule = function(name, el) {
   _origShowModuleCap(name, el);
-  if (name === 'captacao') initCaptacao();
+  if (name === 'captacao') {
+    initCaptacao();
+    setTimeout(renderResumoContatosPorUsuario, 100);
+  }
 };
 
 async function initCaptacao() {

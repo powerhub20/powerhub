@@ -147,6 +147,15 @@ async function initDatabase() {
       valor TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS contatos_captacao (
+      id SERIAL PRIMARY KEY,
+      place_id TEXT,
+      nome_loja TEXT NOT NULL,
+      usuario_contato TEXT NOT NULL,
+      whatsapp_numero TEXT,
+      endereco TEXT,
+      data_contato TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`
   ];
 

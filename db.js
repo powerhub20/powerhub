@@ -140,6 +140,16 @@ function initDatabase() {
       data_entrega TEXT,
       criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS contatos_captacao (
+      id INTEGER PRIMARY KEY,
+      place_id TEXT,
+      nome_loja TEXT NOT NULL,
+      usuario_contato TEXT NOT NULL,
+      whatsapp_numero TEXT,
+      endereco TEXT,
+      data_contato DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `;
 
   schema.split(';').forEach(sql => {
