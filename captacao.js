@@ -122,14 +122,22 @@ async function buscarLojas() {
       detalhesCarregados: false,
     }));
 
-    // 4. Renderizar resultados iniciais
+    // 4. Verificar quais lojas já foram salvas no CRM
+    const salvasNoLocalStorage = JSON.parse(localStorage.getItem('captacao_salvas_crm') || '[]');
+    CAP.leads.forEach(lead => {
+      if (salvasNoLocalStorage.includes(lead.placeId)) {
+        lead.salvoNoCRM = true;
+      }
+    });
+
+    // 5. Renderizar resultados iniciais
     renderizarLeads();
     document.getElementById('capLoading').style.display    = 'none';
     document.getElementById('capResultados').style.display = 'block';
     document.getElementById('capKPIs').style.display       = 'grid';
     atualizarKPIs();
 
-    // 5. Buscar detalhes em background (telefone, site, WhatsApp, e-mail)
+    // 6. Buscar detalhes em background (telefone, site, WhatsApp, e-mail)
     buscarDetalhesBackground();
 
   } catch (e) {
@@ -392,6 +400,8 @@ async function salvarLeadCRMDireto(id) {
   const existe = DB.clientes.find(c => c.nome === l.nome);
   if (existe) {
     showToast(`"${l.nome}" já existe no CRM!`, 'warning');
+    l.salvoNoCRM = true;
+    atualizarLinhaLead(l);
     return;
   }
 
@@ -416,6 +426,14 @@ async function salvarLeadCRMDireto(id) {
       totalGasto:   0,
       ultimaCompra: '—'
     });
+
+    // Salvar no localStorage o placeId da loja salva (para persistir entre recarregamentos)
+    const salvasNoLocalStorage = JSON.parse(localStorage.getItem('captacao_salvas_crm') || '[]');
+    if (!salvasNoLocalStorage.includes(l.placeId)) {
+      salvasNoLocalStorage.push(l.placeId);
+      localStorage.setItem('captacao_salvas_crm', JSON.stringify(salvasNoLocalStorage));
+    }
+
     l.salvoNoCRM = true;
     atualizarLinhaLead(l);
     atualizarKPIs();
