@@ -1275,6 +1275,7 @@ function switchTab(module, tab, btn) {
   btn.classList.add('active');
 
   if (module === 'mkt') { setTimeout(renderMarketing, 50); }
+  if (module === 'crm' && tab === 'relatorio') { setTimeout(() => renderRelatorioContatos?.(), 50); }
 }
 
 // ============================
