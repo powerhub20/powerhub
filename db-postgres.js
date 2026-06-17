@@ -120,6 +120,7 @@ async function initDatabase() {
       compras INTEGER DEFAULT 0,
       total_gasto REAL DEFAULT 0,
       ultima_compra TEXT,
+      usuario_contato TEXT,
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,
     `CREATE TABLE IF NOT EXISTS fornecedores (

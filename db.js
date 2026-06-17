@@ -116,6 +116,7 @@ function initDatabase() {
       compras INTEGER DEFAULT 0,
       total_gasto REAL DEFAULT 0,
       ultima_compra TEXT,
+      usuario_contato TEXT,
       criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 

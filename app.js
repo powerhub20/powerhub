@@ -1154,7 +1154,7 @@ function renderCRM() {
     <td>${c.email}</td>
     <td>${c.origem}</td>
     <td><span class="status-badge pendente">${c.estagio}</span></td>
-    <td>—</td>
+    <td>${c.usuario_contato ? `<span style="background:var(--gold);color:var(--dark);padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600">${c.usuario_contato}</span>` : '—'}</td>
     <td><div class="actions-cell">
       <button class="btn-icon del" onclick="deleteCliente(${c.id})"><i class="fas fa-trash"></i></button>
     </div></td>
