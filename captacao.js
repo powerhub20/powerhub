@@ -412,7 +412,8 @@ async function salvarLeadCRMDireto(id) {
     telefone:     l.telefone || '',
     origem:       'Captação Lojas',
     estagio:      'Contato',
-    observacoes:  `Endereço: ${l.endereco}${l.whatsapp ? ' | WhatsApp: +'+l.whatsapp : ''}${l.site ? ' | Site: '+l.site : ''}`
+    observacoes:  `Endereço: ${l.endereco}${l.whatsapp ? ' | WhatsApp: +'+l.whatsapp : ''}${l.site ? ' | Site: '+l.site : ''}`,
+    usuario_contato: DB.user?.nome
   };
 
   const result = await apiRequest('POST', '/api/clientes', cliente);
@@ -422,6 +423,7 @@ async function salvarLeadCRMDireto(id) {
       ...cliente,
       tel:          cliente.telefone,
       obs:          cliente.observacoes,
+      usuario_contato: DB.user?.nome,
       compras:      0,
       totalGasto:   0,
       ultimaCompra: '—'
