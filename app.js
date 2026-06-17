@@ -315,6 +315,10 @@ function showModule(name, el) {
           DB.clientes = data || [];
           console.log('✅ Clientes carregados:', DB.clientes.length);
           renderCRM();
+          // Carregar relatório de contatos também
+          if (typeof renderRelatorioContatos === 'function') {
+            setTimeout(() => renderRelatorioContatos(), 100);
+          }
         })
         .catch(e => {
           console.error('❌ Erro ao carregar clientes:', e);

@@ -643,6 +643,7 @@
           <button class="tab active" onclick="switchTab('crm','clientes',this)">Clientes</button>
           <button class="tab" onclick="switchTab('crm','leads',this)">Leads</button>
           <button class="tab" onclick="switchTab('crm','fornecedoresCRM',this)">Fornecedores</button>
+          <button class="tab" onclick="switchTab('crm','relatorio',this)">📊 Relatório de Contatos</button>
         </div>
         <div id="crm-clientes" class="tab-content active">
           <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Compras</th><th>Total Gasto</th><th>Última Compra</th><th>Ações</th></tr></thead><tbody id="tbodyClientes"></tbody></table></div></div>
@@ -652,6 +653,36 @@
         </div>
         <div id="crm-fornecedoresCRM" class="tab-content">
           <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>CNPJ</th><th>Produto</th><th>Contato</th><th>Prazo Entrega</th><th>Ações</th></tr></thead><tbody id="tbodyFornCRM"></tbody></table></div></div>
+        </div>
+        <div id="crm-relatorio" class="tab-content">
+          <div style="padding:16px;background:var(--bg-1);border-radius:8px;border:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <div style="font-size:14px;font-weight:600;color:var(--text)">📊 Relatório Completo de Contatos</div>
+              <div style="display:flex;gap:8px">
+                <select id="capRelatorioFiltroUsuario" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg-2);color:var(--text);font-size:12px" onchange="renderRelatorioContatos()">
+                  <option value="">Todos os usuários</option>
+                </select>
+                <button class="btn-outline btn-sm" onclick="exportarRelatorioContatos()"><i class="fas fa-download"></i> Exportar CSV</button>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="table-wrap" style="max-height:500px;overflow-y:auto">
+                <table class="data-table" id="tblRelatorioContatos">
+                  <thead>
+                    <tr>
+                      <th style="width:200px">Loja</th>
+                      <th style="width:150px">Usuário</th>
+                      <th style="width:150px">WhatsApp</th>
+                      <th style="width:200px">Endereço</th>
+                      <th style="width:150px">Data/Hora</th>
+                      <th style="width:80px">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyRelatorioContatos"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -735,38 +766,6 @@
 
         <!-- RESUMO DE CONTATOS POR USUÁRIO -->
         <div id="capResumoContatosUsuarios" style="margin-bottom:20px;display:none"></div>
-
-        <!-- RELATÓRIO DE CONTATOS (ADMIN) -->
-        <div id="capRelatorioContatos" style="margin-bottom:20px;display:none">
-          <div style="padding:16px;background:var(--bg-1);border-radius:8px;border:1px solid var(--border)">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-              <div style="font-size:14px;font-weight:600;color:var(--text)">📊 Relatório Completo de Contatos</div>
-              <div style="display:flex;gap:8px">
-                <select id="capRelatorioFiltroUsuario" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg-2);color:var(--text);font-size:12px" onchange="renderRelatorioContatos()">
-                  <option value="">Todos os usuários</option>
-                </select>
-                <button class="btn-outline btn-sm" onclick="exportarRelatorioContatos()"><i class="fas fa-download"></i> Exportar CSV</button>
-              </div>
-            </div>
-            <div class="table-card">
-              <div class="table-wrap" style="max-height:500px;overflow-y:auto">
-                <table class="data-table" id="tblRelatorioContatos">
-                  <thead>
-                    <tr>
-                      <th style="width:200px">Loja</th>
-                      <th style="width:150px">Usuário</th>
-                      <th style="width:150px">WhatsApp</th>
-                      <th style="width:200px">Endereço</th>
-                      <th style="width:150px">Data/Hora</th>
-                      <th style="width:80px">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyRelatorioContatos"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- LOADING -->
         <div id="capLoading" style="display:none;text-align:center;padding:48px">
