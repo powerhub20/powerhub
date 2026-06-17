@@ -1263,19 +1263,28 @@ function clearNotifs() {
 // TABS
 // ============================
 function switchTab(module, tab, btn) {
+  console.log(`🔄 Mudando para tab: ${module}-${tab}`);
   const prefix = module + '-';
   document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => {
     if (el.classList.contains('tab-content')) el.classList.remove('active');
   });
   const target = document.getElementById(prefix + tab);
-  if (target) target.classList.add('active');
+  if (target) {
+    target.classList.add('active');
+    console.log(`✅ Tab ativada: ${prefix + tab}`);
+  } else {
+    console.error(`❌ Tab não encontrada: ${prefix + tab}`);
+  }
 
   const parent = btn.closest('.tabs-bar');
   if (parent) parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
 
   if (module === 'mkt') { setTimeout(renderMarketing, 50); }
-  if (module === 'crm' && tab === 'relatorio') { setTimeout(() => renderRelatorioContatos?.(), 50); }
+  if (module === 'crm' && tab === 'relatorio') {
+    console.log('📊 Carregando relatório de contatos...');
+    setTimeout(() => renderRelatorioContatos?.(), 50);
+  }
 }
 
 // ============================
