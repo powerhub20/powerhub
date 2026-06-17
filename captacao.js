@@ -553,15 +553,21 @@ async function abrirWhatsAppERegistrar(whatsapp, nomeLoja, placeId, endereco) {
   // 1. Registrar na tabela contatos_captacao
   const resultContato = await apiRequest('POST', '/api/contatos_captacao', contato);
 
-  // 2. Atualizar cliente no CRM com o usuário que contatou (se existir)
+  // 2. Criar/Atualizar cliente no CRM
   const clienteExistente = DB.clientes?.find(c => c.nome === nomeLoja);
   if (clienteExistente) {
+    // Atualizar com usuário que contatou
     await apiRequest('PUT', `/api/clientes/${clienteExistente.id}`, {
       usuario_contato: DB.user.nome
     });
-    // Atualizar em memória
     clienteExistente.usuario_contato = DB.user.nome;
     renderCRM();
+  } else {
+    // CRIAR novo cliente se não existir
+    const l = CAP.leads.find(x => x.nome === nomeLoja);
+    if (l) {
+      await salvarLeadCRMDireto(l.id);
+    }
   }
 
   if (resultContato) {
