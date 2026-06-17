@@ -307,7 +307,16 @@ function showModule(name, el) {
     metas: renderMetas,
     funcionarios: renderFuncionarios,
     marketing: renderMarketing,
-    crm: renderCRM,
+    crm: () => {
+      // Recarregar clientes do banco antes de renderizar
+      fetch('/api/clientes')
+        .then(r => r.json())
+        .then(data => {
+          DB.clientes = data;
+          renderCRM();
+        })
+        .catch(() => renderCRM());
+    },
     compras: renderCompras,
     relatorios: () => {},
   };
