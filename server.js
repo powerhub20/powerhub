@@ -99,6 +99,46 @@ app.get('/api/nuvemshop/status', (req, res) => {
   });
 });
 
+// ══════════════════════════════════════════════
+// MIGRAÇÕES
+// ══════════════════════════════════════════════
+
+// Endpoint para executar migrações (desenvolvimento/admin)
+app.post('/api/admin/migrate', (req, res) => {
+  const migrations = [
+    `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS usuario_contato TEXT`,
+  ];
+
+  let completed = 0;
+  migrations.forEach(sql => {
+    if (process.env.DATABASE_URL) {
+      // PostgreSQL
+      const pool = require('./db-postgres').pool;
+      pool.query(sql, (err) => {
+        completed++;
+        if (err) console.log(`⚠️ Migração erro:`, err.message.substring(0, 100));
+        else console.log(`✅ Migração: ${sql.substring(0, 60)}...`);
+
+        if (completed === migrations.length) {
+          res.json({ ok: true, message: 'Migrações completadas' });
+        }
+      });
+    } else {
+      // SQLite
+      const db = require('./db').db;
+      db.run(sql, (err) => {
+        completed++;
+        if (err) console.log(`⚠️ Migração erro:`, err.message);
+        else console.log(`✅ Migração: ${sql.substring(0, 60)}...`);
+
+        if (completed === migrations.length) {
+          res.json({ ok: true, message: 'Migrações completadas' });
+        }
+      });
+    }
+  });
+});
+
 // ──────────────────────────────────────────────
 // OAuth — Iniciar autenticação
 // Redireciona o navegador para a Nuvemshop autorizar
