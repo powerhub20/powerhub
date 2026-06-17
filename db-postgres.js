@@ -175,7 +175,8 @@ async function initDatabase() {
       `ALTER TABLE funcionarios ADD COLUMN IF NOT EXISTS permissoes TEXT`,
       `ALTER TABLE tarefas ADD COLUMN IF NOT EXISTS criado_por TEXT`,
       `ALTER TABLE metas ADD COLUMN IF NOT EXISTS criado_por TEXT`,
-      `ALTER TABLE avisos ADD COLUMN IF NOT EXISTS criado_por TEXT`
+      `ALTER TABLE avisos ADD COLUMN IF NOT EXISTS criado_por TEXT`,
+      `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS usuario_contato TEXT`
     ];
 
     for (const migration of migrations) {
