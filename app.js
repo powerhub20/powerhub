@@ -1515,10 +1515,10 @@ async function saveCliente() {
   const tipo=val('cliTipo'), nome=val('cliNome'), email=val('cliEmail'), tel=val('cliTel'), origem=val('cliOrigem'), estagio=val('cliEstagio'), obs=val('cliObs');
   if (!nome) return showToast('Informe o nome', 'error');
 
-  const cliente = { tipo, nome, email, telefone: tel, origem, estagio, observacoes: obs };
+  const cliente = { tipo, nome, email, telefone: tel, origem, estagio, observacoes: obs, usuario_contato: DB.user?.nome };
   const result = await apiRequest('POST', '/api/clientes', cliente);
   if (result) {
-    DB.clientes.push({ id: result.id, tipo, nome, email, tel, origem, estagio, obs, compras:0, totalGasto:0, ultimaCompra:'—' });
+    DB.clientes.push({ id: result.id, tipo, nome, email, tel, origem, estagio, obs, usuario_contato: DB.user?.nome, compras:0, totalGasto:0, ultimaCompra:'—' });
     closeModal('modalCliente');
     renderCRM();
     showToast('Contato adicionado!', 'success');
