@@ -312,10 +312,14 @@ function showModule(name, el) {
       fetch('/api/clientes')
         .then(r => r.json())
         .then(data => {
-          DB.clientes = data;
+          DB.clientes = data || [];
+          console.log('✅ Clientes carregados:', DB.clientes.length);
           renderCRM();
         })
-        .catch(() => renderCRM());
+        .catch(e => {
+          console.error('❌ Erro ao carregar clientes:', e);
+          renderCRM();
+        });
     },
     compras: renderCompras,
     relatorios: () => {},
