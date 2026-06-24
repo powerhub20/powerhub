@@ -1036,8 +1036,9 @@ function renderFuncionarios() {
         <div class="emp-stat"><span class="emp-stat-val">${Math.round(f.concluidas/f.tarefas*100)}%</span><span class="emp-stat-lbl">Taxa</span></div>
       </div>
       <div style="display: flex; gap: 8px; margin-top: 10px;">
-        <button class="btn-primary" onclick="abrirAlterarSenha(${f.id}, '${f.nome}', '${f.email}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-key"></i> Alterar Senha</button>
-        <button class="btn-primary" onclick="abrirEditarPermissoes(${f.id}, '${f.nome}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-shield"></i> Permissões</button>
+        <button class="btn-primary" onclick="abrirEditarFuncionario(${f.id})" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-edit"></i> Editar</button>
+        <button class="btn-primary" onclick="abrirAlterarSenha(${f.id}, '${f.nome}', '${f.email}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-key"></i> Senha</button>
+        <button class="btn-primary" onclick="abrirEditarPermissoes(${f.id}, '${f.nome}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-shield"></i> Perms</button>
         <button class="btn-icon-delete" onclick="if(confirm('Deletar ${f.nome}? Ele perderá acesso ao sistema!')) deleteFuncionario(${f.id})" title="Deletar funcionário"><i class="fas fa-trash"></i></button>
       </div>
     </div>`;
@@ -1690,6 +1691,51 @@ async function deleteFuncionario(id) {
     renderFuncionarios();
   } else {
     showToast('Erro ao deletar funcionário', 'error');
+  }
+}
+
+function abrirEditarFuncionario(id) {
+  const func = DB.funcionarios.find(f => f.id === id);
+  if (!func) return;
+
+  window.editFuncId = id;
+  document.getElementById('editFuncNome').value = func.nome;
+  document.getElementById('editFuncCargo').value = func.cargo;
+  document.getElementById('editFuncDepto').value = func.depto;
+  document.getElementById('editFuncTel').value = func.tel;
+  document.getElementById('editFuncEmail').value = func.email;
+
+  openModal('modalEditarFuncionario');
+}
+
+async function salvarEditarFuncionario() {
+  const funcId = window.editFuncId;
+  if (!funcId) return showToast('Erro: funcionário não identificado', 'error');
+
+  const nome = document.getElementById('editFuncNome').value.trim();
+  const cargo = document.getElementById('editFuncCargo').value.trim();
+  const depto = document.getElementById('editFuncDepto').value.trim();
+  const tel = document.getElementById('editFuncTel').value.trim();
+  const email = document.getElementById('editFuncEmail').value.trim();
+
+  if (!nome) return showToast('Nome é obrigatório', 'warning');
+
+  const result = await apiRequest('PUT', `/api/funcionarios/${funcId}`, {
+    nome, cargo, depto, tel, email
+  });
+
+  if (result) {
+    const func = DB.funcionarios.find(f => f.id === funcId);
+    if (func) {
+      func.nome = nome;
+      func.cargo = cargo;
+      func.depto = depto;
+      func.tel = tel;
+      func.email = email;
+    }
+    closeModal('modalEditarFuncionario');
+    renderFuncionarios();
+    showToast('Funcionário atualizado!', 'success');
   }
 }
 

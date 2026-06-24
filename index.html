@@ -1107,6 +1107,23 @@
   </div>
 </div>
 
+<!-- Modal Editar Funcionário -->
+<div id="modalEditarFuncionario" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>✏️ Editar Funcionário</h3><button onclick="closeModal('modalEditarFuncionario')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Nome *</label><input type="text" id="editFuncNome" placeholder="Nome do funcionário"></div>
+        <div class="field-group"><label>Cargo</label><input type="text" id="editFuncCargo" placeholder="Ex: Gerente"></div>
+        <div class="field-group"><label>Departamento</label><input type="text" id="editFuncDepto" placeholder="Ex: Administrativo"></div>
+        <div class="field-group"><label>Telefone</label><input type="text" id="editFuncTel" placeholder="Ex: (11) 99999-0000"></div>
+        <div class="field-group"><label>E-mail</label><input type="text" id="editFuncEmail" placeholder="Ex: usuario@empresa.com"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('modalEditarFuncionario')">Cancelar</button><button class="btn-primary" onclick="salvarEditarFuncionario()">Salvar Alterações</button></div>
+  </div>
+</div>
+
 <!-- Modal Alterar Senha -->
 <div id="modalAlterarSenha" class="modal-overlay">
   <div class="modal">
