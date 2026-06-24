@@ -649,6 +649,15 @@
           <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Compras</th><th>Total Gasto</th><th>Última Compra</th><th>Ações</th></tr></thead><tbody id="tbodyClientes"></tbody></table></div></div>
         </div>
         <div id="crm-leads" class="tab-content">
+          <div style="padding:16px;background:var(--bg-1);border-radius:8px;border:1px solid var(--border);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:13px;font-weight:600;color:var(--text)">🔍 Filtrar por Funcionário:</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select id="crmFiltroUsuario" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg-2);color:var(--text);font-size:12px" onchange="aplicarFiltroCRMLeads()">
+                <option value="">Todos os funcionários</option>
+              </select>
+              <div id="crmCountLeads" style="font-size:12px;color:var(--gold);font-weight:600">0 leads</div>
+            </div>
+          </div>
           <div class="table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Nome</th><th>Endereço</th><th>Origem</th><th>Estágio</th><th>Usuário de Contato</th><th>Ações</th></tr></thead><tbody id="tbodyLeads"></tbody></table></div></div>
         </div>
         <div id="crm-fornecedoresCRM" class="tab-content">

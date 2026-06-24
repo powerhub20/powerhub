@@ -1211,6 +1211,55 @@ function renderCRM() {
     <td>${f.contato}</td><td>${f.prazo}</td>
     <td><div class="actions-cell"><button class="btn-icon del" onclick="deleteFornCRM(${f.id})"><i class="fas fa-trash"></i></button></div></td>
   </tr>`).join('');
+
+  atualizarFiltroLeads();
+}
+
+function atualizarFiltroLeads() {
+  const select = document.getElementById('crmFiltroUsuario');
+  if (!select) return;
+
+  const leads = DB.clientes.filter(c => c.tipo === 'Lead');
+  const usuarios = [...new Set(leads.map(c => c.usuario_contato).filter(Boolean))].sort();
+
+  const opcaoAtual = select.value;
+  select.innerHTML = '<option value="">Todos os funcionários</option>' +
+    usuarios.map(u => `<option value="${u}">${u}</option>`).join('');
+  select.value = opcaoAtual;
+
+  aplicarFiltroCRMLeads();
+}
+
+function aplicarFiltroCRMLeads() {
+  const select = document.getElementById('crmFiltroUsuario');
+  const filtroUsuario = select?.value || '';
+
+  let leads = DB.clientes.filter(c => c.tipo === 'Lead');
+  if (filtroUsuario) {
+    leads = leads.filter(c => c.usuario_contato === filtroUsuario);
+  }
+
+  const tL = document.getElementById('tbodyLeads');
+  if (tL) {
+    tL.innerHTML = leads.map(c => {
+      const endereco = extrairCidadeEstado(c.endereco || c.email || '—');
+      return `<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td style="font-size:12px;color:var(--text-2)">${endereco}</td>
+      <td>${c.origem}</td>
+      <td><span class="status-badge pendente">${c.estagio}</span></td>
+      <td>${c.usuario_contato ? `<span style="background:var(--gold);color:var(--dark);padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600">${c.usuario_contato}</span>` : '—'}</td>
+      <td><div class="actions-cell">
+        <button class="btn-icon del" onclick="deleteCliente(${c.id})"><i class="fas fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+    }).join('');
+  }
+
+  const countEl = document.getElementById('crmCountLeads');
+  if (countEl) {
+    countEl.textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+  }
 }
 
 // ============================
