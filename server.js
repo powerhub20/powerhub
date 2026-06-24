@@ -601,6 +601,24 @@ TABLES.forEach(table => {
   });
 });
 
+// UPDATE usuario_contato em todos os clientes
+app.post('/api/clientes/update-usuario-contato', (req, res) => {
+  const { nomeAntigo, nomeNovo } = req.body;
+  if (!nomeAntigo || !nomeNovo) {
+    return res.status(400).json({ error: 'nomeAntigo e nomeNovo são obrigatórios' });
+  }
+
+  const sql = 'UPDATE clientes SET usuario_contato = $1 WHERE usuario_contato = $2';
+  pool.query(sql, [nomeNovo, nomeAntigo], (err, result) => {
+    if (err) {
+      console.error('Erro ao atualizar usuario_contato:', err);
+      return res.status(400).json({ error: 'Erro ao atualizar' });
+    }
+    console.log(`✅ ${result.rowCount} clientes atualizados: ${nomeAntigo} → ${nomeNovo}`);
+    res.json({ ok: true, updated: result.rowCount });
+  });
+});
+
 // ══════════════════════════════════════════════
 // VENDAS — Leitura dinâmica do Excel
 // ══════════════════════════════════════════════

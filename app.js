@@ -1742,6 +1742,9 @@ async function salvarEditarFuncionario() {
 
     // Atualizar todos os leads com o nome antigo para o novo nome
     if (nomeAntigo && nomeAntigo !== nome) {
+      const leadsAntigos = DB.clientes.filter(c => c.usuario_contato === nomeAntigo).length;
+
+      // Atualizar em memória
       DB.clientes.forEach(c => {
         if (c.usuario_contato === nomeAntigo) {
           c.usuario_contato = nome;
@@ -1749,7 +1752,12 @@ async function salvarEditarFuncionario() {
       });
 
       // Atualizar no banco de dados
-      console.log(`🔄 Atualizando ${DB.clientes.filter(c => c.usuario_contato === nome).length} leads com novo nome`);
+      console.log(`🔄 Atualizando ${leadsAntigos} leads: ${nomeAntigo} → ${nome}`);
+      apiRequest('POST', '/api/clientes/update-usuario-contato', {
+        nomeAntigo, nomeNovo: nome
+      }).then(result => {
+        console.log('📊 Atualização no banco:', result);
+      });
     }
 
     closeModal('modalEditarFuncionario');
