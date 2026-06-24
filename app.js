@@ -1730,6 +1730,8 @@ async function salvarEditarFuncionario() {
 
   if (result !== null) {
     const func = DB.funcionarios.find(f => f.id === funcId);
+    const nomeAntigo = func?.nome;
+
     if (func) {
       func.nome = nome;
       func.cargo = cargo;
@@ -1737,9 +1739,24 @@ async function salvarEditarFuncionario() {
       func.tel = telefone;
       func.email = email;
     }
+
+    // Atualizar todos os leads com o nome antigo para o novo nome
+    if (nomeAntigo && nomeAntigo !== nome) {
+      DB.clientes.forEach(c => {
+        if (c.usuario_contato === nomeAntigo) {
+          c.usuario_contato = nome;
+        }
+      });
+
+      // Atualizar no banco de dados
+      console.log(`🔄 Atualizando ${DB.clientes.filter(c => c.usuario_contato === nome).length} leads com novo nome`);
+    }
+
     closeModal('modalEditarFuncionario');
     renderFuncionarios();
-    showToast('✅ Funcionário atualizado!', 'success');
+    renderCRM();
+    atualizarFiltroLeads();
+    showToast('✅ Funcionário atualizado! Leads atualizados também.', 'success');
   } else {
     showToast('❌ Erro ao salvar. Verifique o console.', 'error');
   }
