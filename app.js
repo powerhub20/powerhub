@@ -1167,16 +1167,23 @@ function renderCRM() {
   </tr>`).join('');
 
   const tL = document.getElementById('tbodyLeads');
-  if (tL) tL.innerHTML = leads.map(c => `<tr>
+  if (tL) tL.innerHTML = leads.map(c => {
+    let endereco = c.endereco || c.email || '—';
+    if (endereco !== '—') {
+      const partes = endereco.split(' - ');
+      endereco = partes[partes.length - 1];
+    }
+    return `<tr>
     <td><strong>${c.nome}</strong></td>
-    <td style="font-size:12px;color:var(--text-2)">${c.endereco || c.email || '—'}</td>
+    <td style="font-size:12px;color:var(--text-2)">${endereco}</td>
     <td>${c.origem}</td>
     <td><span class="status-badge pendente">${c.estagio}</span></td>
     <td>${c.usuario_contato ? `<span style="background:var(--gold);color:var(--dark);padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600">${c.usuario_contato}</span>` : '—'}</td>
     <td><div class="actions-cell">
       <button class="btn-icon del" onclick="deleteCliente(${c.id})"><i class="fas fa-trash"></i></button>
     </div></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 
   const tF = document.getElementById('tbodyFornCRM');
   if (tF) tF.innerHTML = DB.fornecedores.map(f => `<tr>
