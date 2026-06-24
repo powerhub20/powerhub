@@ -1720,11 +1720,15 @@ async function salvarEditarFuncionario() {
 
   if (!nome) return showToast('Nome é obrigatório', 'warning');
 
+  console.log('💾 Salvando funcionário:', { funcId, nome, cargo, depto, tel, email });
+
   const result = await apiRequest('PUT', `/api/funcionarios/${funcId}`, {
     nome, cargo, depto, tel, email
   });
 
-  if (result) {
+  console.log('📨 Resposta do servidor:', result);
+
+  if (result !== null) {
     const func = DB.funcionarios.find(f => f.id === funcId);
     if (func) {
       func.nome = nome;
@@ -1735,7 +1739,9 @@ async function salvarEditarFuncionario() {
     }
     closeModal('modalEditarFuncionario');
     renderFuncionarios();
-    showToast('Funcionário atualizado!', 'success');
+    showToast('✅ Funcionário atualizado!', 'success');
+  } else {
+    showToast('❌ Erro ao salvar. Verifique o console.', 'error');
   }
 }
 
