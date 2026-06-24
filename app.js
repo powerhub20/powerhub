@@ -1714,16 +1714,16 @@ async function salvarEditarFuncionario() {
 
   const nome = document.getElementById('editFuncNome').value.trim();
   const cargo = document.getElementById('editFuncCargo').value.trim();
-  const depto = document.getElementById('editFuncDepto').value.trim();
-  const tel = document.getElementById('editFuncTel').value.trim();
+  const departamento = document.getElementById('editFuncDepto').value.trim();
+  const telefone = document.getElementById('editFuncTel').value.trim();
   const email = document.getElementById('editFuncEmail').value.trim();
 
   if (!nome) return showToast('Nome é obrigatório', 'warning');
 
-  console.log('💾 Salvando funcionário:', { funcId, nome, cargo, depto, tel, email });
+  console.log('💾 Salvando funcionário:', { funcId, nome, cargo, departamento, telefone, email });
 
   const result = await apiRequest('PUT', `/api/funcionarios/${funcId}`, {
-    nome, cargo, depto, tel, email
+    nome, cargo, departamento, telefone, email
   });
 
   console.log('📨 Resposta do servidor:', result);
@@ -1733,8 +1733,8 @@ async function salvarEditarFuncionario() {
     if (func) {
       func.nome = nome;
       func.cargo = cargo;
-      func.depto = depto;
-      func.tel = tel;
+      func.depto = departamento;
+      func.tel = telefone;
       func.email = email;
     }
     closeModal('modalEditarFuncionario');
