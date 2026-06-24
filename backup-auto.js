@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 // URL de produção Railway (pegando do servidor em produção)
-const DATABASE_URL = 'postgresql://postgres:UPLg4kBcCYPQEBjACJ7YQQoF@vtuSYYigacela.proxy.rlwy.net:47748/railway';
+const DATABASE_URL = 'postgresql://postgres:UPLgMHxBccYPOeBjAcJZYOQoFvtuSYvT@postgres.railway.internal:5432/railway';
 
 const BACKUP_DIR = path.join(__dirname, 'backups');
 const TIMESTAMP = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
