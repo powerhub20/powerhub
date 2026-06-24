@@ -117,6 +117,7 @@ async function initDatabase() {
       origem TEXT,
       estagio TEXT,
       observacoes TEXT,
+      endereco TEXT,
       compras INTEGER DEFAULT 0,
       total_gasto REAL DEFAULT 0,
       ultima_compra TEXT,
@@ -176,7 +177,8 @@ async function initDatabase() {
       `ALTER TABLE tarefas ADD COLUMN IF NOT EXISTS criado_por TEXT`,
       `ALTER TABLE metas ADD COLUMN IF NOT EXISTS criado_por TEXT`,
       `ALTER TABLE avisos ADD COLUMN IF NOT EXISTS criado_por TEXT`,
-      `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS usuario_contato TEXT`
+      `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS usuario_contato TEXT`,
+      `ALTER TABLE clientes ADD COLUMN IF NOT EXISTS endereco TEXT`
     ];
 
     for (const migration of migrations) {

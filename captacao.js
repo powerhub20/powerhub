@@ -412,7 +412,8 @@ async function salvarLeadCRMDireto(id) {
     telefone:     l.telefone || '',
     origem:       'Captação Lojas',
     estagio:      'Contato',
-    observacoes:  `Endereço: ${l.endereco}${l.whatsapp ? ' | WhatsApp: +'+l.whatsapp : ''}${l.site ? ' | Site: '+l.site : ''}`,
+    endereco:     l.endereco || '',
+    observacoes:  `${l.whatsapp ? 'WhatsApp: +'+l.whatsapp : ''}${l.site ? ' | Site: '+l.site : ''}`,
     usuario_contato: DB.user?.nome
   };
 

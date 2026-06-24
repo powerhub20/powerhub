@@ -1169,7 +1169,7 @@ function renderCRM() {
   const tL = document.getElementById('tbodyLeads');
   if (tL) tL.innerHTML = leads.map(c => `<tr>
     <td><strong>${c.nome}</strong></td>
-    <td>${c.email}</td>
+    <td style="font-size:12px;color:var(--text-2)">${c.endereco || c.email || '—'}</td>
     <td>${c.origem}</td>
     <td><span class="status-badge pendente">${c.estagio}</span></td>
     <td>${c.usuario_contato ? `<span style="background:var(--gold);color:var(--dark);padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600">${c.usuario_contato}</span>` : '—'}</td>

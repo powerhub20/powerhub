@@ -113,6 +113,7 @@ function initDatabase() {
       origem TEXT,
       estagio TEXT,
       observacoes TEXT,
+      endereco TEXT,
       compras INTEGER DEFAULT 0,
       total_gasto REAL DEFAULT 0,
       ultima_compra TEXT,
