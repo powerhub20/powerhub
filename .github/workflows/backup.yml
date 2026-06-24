@@ -1,0 +1,38 @@
+name: 🔄 Database Backup Automático
+
+on:
+  schedule:
+    # Rodar todo dia às 3AM (UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch:  # Permite rodar manualmente
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 💾 Fazer backup do banco
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npm list pg-dump || npm install pg
+          node backup.js
+
+      - name: 📤 Commit backup para repo
+        run: |
+          git config user.name "🤖 Backup Bot"
+          git config user.email "backup@powerhub.local"
+          git add backups/
+          git commit -m "🔄 Backup automático: $(date +%Y-%m-%d)" || echo "Sem mudanças"
+          git push
+
+      - name: 📧 Notificar sucesso
+        run: echo "✅ Backup completado em $(date)"
