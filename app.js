@@ -35,6 +35,30 @@ const DB = {
 // Expor globalmente para integração Nuvemshop
 window.DB = DB;
 
+// Mapa de cidades para estados
+const CIDADE_ESTADO = {
+  'São José dos Pinhais': 'SP', 'Curitiba': 'PR', 'Campo Largo': 'PR', 'Araucária': 'PR', 'Colombo': 'PR',
+  'Palmeira': 'PR', 'Apucarana': 'PR', 'Arapongas': 'PR', 'Londrina': 'PR', 'Maringá': 'PR',
+  'Jandaia do Sul': 'PR', 'Mauá da Serra': 'PR', 'Cambé': 'PR', 'Ibiporã': 'PR', 'Bela Vista do Paraíso': 'PR',
+  'Tamarana': 'PR', 'Rolândia': 'PR', 'Assaí': 'PR', 'Marumbi': 'PR', 'São Sebastião da Amoreira': 'PR',
+  'Jaguapitã': 'PR', 'Barra do Garças': 'MT', 'Naviraí': 'MS', 'Campo Grande': 'MS', 'Paranaíba': 'MS',
+  'Iguatemi': 'MS', 'Mundo Novo': 'MS', 'Guaíra': 'SP', 'Santa Albertina': 'SP', 'Campinas': 'SP',
+  'São Paulo': 'SP', 'São João da Boa Vista': 'SP', 'Divisa Nova': 'MG', 'Espírito Santo do Pinhal': 'SP',
+  'Ipuiúna': 'MG', 'Muzambinho': 'MG', 'Campestre': 'MG', 'Andradas': 'MG', 'Botelhos': 'MG',
+  'Poços de Caldas': 'MG', 'Lavras': 'MG', 'Passos': 'MG', 'Capelinha': 'MG', 'Avelinópolis': 'GO',
+  'Brás': 'SP', 'Rio Preto': 'SP', 'Urânia': 'SP', 'Califórnia': 'PR', 'Ji-Paraná': 'RO'
+};
+
+function extrairCidadeEstado(endereco) {
+  if (!endereco || endereco === '—') return '—';
+  const partes = endereco.split(' - ');
+  const localizacao = partes[partes.length - 1];
+  const partesCidade = localizacao.split(',').map(p => p.trim());
+  const cidade = partesCidade[partesCidade.length - 1];
+  const estado = CIDADE_ESTADO[cidade] || '';
+  return estado ? `${cidade}, ${estado}` : cidade;
+}
+
 // ============================
 // PERSISTENCE — SQLite via API
 // ============================
@@ -1168,11 +1192,7 @@ function renderCRM() {
 
   const tL = document.getElementById('tbodyLeads');
   if (tL) tL.innerHTML = leads.map(c => {
-    let endereco = c.endereco || c.email || '—';
-    if (endereco !== '—') {
-      const partes = endereco.split(' - ');
-      endereco = partes[partes.length - 1];
-    }
+    const endereco = extrairCidadeEstado(c.endereco || c.email || '—');
     return `<tr>
     <td><strong>${c.nome}</strong></td>
     <td style="font-size:12px;color:var(--text-2)">${endereco}</td>
