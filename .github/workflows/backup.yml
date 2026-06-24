@@ -19,20 +19,24 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 💾 Fazer backup do banco
+      - name: 📦 Instalar dependências
+        run: npm install pg
+
+      - name: 💾 Fazer backup automático do banco
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          npm list pg-dump || npm install pg
-          node backup.js
+          # Atualizar backup-auto.js com DATABASE_URL do secret
+          sed -i "s|const DATABASE_URL = '.*'|const DATABASE_URL = '${{ secrets.DATABASE_URL }}'|g" backup-auto.js
+          node backup-auto.js
 
-      - name: 📤 Commit backup para repo
+      - name: 📤 Commit backup para repositório
         run: |
           git config user.name "🤖 Backup Bot"
           git config user.email "backup@powerhub.local"
           git add backups/
-          git commit -m "🔄 Backup automático: $(date +%Y-%m-%d)" || echo "Sem mudanças"
-          git push
+          git commit -m "🔄 Backup automático: $(date +%Y-%m-%d)" || echo "Nenhum backup novo"
+          git push origin main
 
-      - name: 📧 Notificar sucesso
-        run: echo "✅ Backup completado em $(date)"
+      - name: ✅ Backup concluído
+        run: echo "✅ Backup automático completado com sucesso!"
