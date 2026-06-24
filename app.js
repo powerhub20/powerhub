@@ -1013,6 +1013,7 @@ function renderFuncionarios() {
       </div>
       <div style="display: flex; gap: 8px; margin-top: 10px;">
         <button class="btn-primary" onclick="abrirAlterarSenha(${f.id}, '${f.nome}', '${f.email}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-key"></i> Alterar Senha</button>
+        <button class="btn-primary" onclick="abrirEditarPermissoes(${f.id}, '${f.nome}')" style="flex: 1; padding: 8px; font-size: 12px;"><i class="fas fa-shield"></i> Permissões</button>
         <button class="btn-icon-delete" onclick="if(confirm('Deletar ${f.nome}? Ele perderá acesso ao sistema!')) deleteFuncionario(${f.id})" title="Deletar funcionário"><i class="fas fa-trash"></i></button>
       </div>
     </div>`;
@@ -1623,6 +1624,50 @@ function abrirAlterarSenha(id, nome, email) {
   document.getElementById('altSenhaFuncEmail').value = email;
   document.getElementById('altSenhaNova').value = '';
   openModal('modalAlterarSenha');
+}
+
+function abrirEditarPermissoes(id, nome) {
+  const func = DB.funcionarios.find(f => f.id === id);
+  if (!func) return;
+
+  window.editPermFuncId = id;
+  document.getElementById('editPermFuncNome').textContent = nome;
+
+  // Carregar permissões do funcionário
+  const permissoes = func.permissoes ? JSON.parse(func.permissoes) : {};
+  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao'];
+
+  modulos.forEach(mod => {
+    const checkbox = document.getElementById(`editPerm${mod.charAt(0).toUpperCase() + mod.slice(1)}`);
+    if (checkbox) checkbox.checked = permissoes[mod] || false;
+  });
+
+  openModal('modalEditarPermissoes');
+}
+
+async function salvarPermissoes() {
+  const funcId = window.editPermFuncId;
+  if (!funcId) return showToast('Erro: funcionário não identificado', 'error');
+
+  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao'];
+  const permissoes = {};
+
+  modulos.forEach(mod => {
+    const checkbox = document.getElementById(`editPerm${mod.charAt(0).toUpperCase() + mod.slice(1)}`);
+    if (checkbox) permissoes[mod] = checkbox.checked;
+  });
+
+  const result = await apiRequest('PUT', `/api/funcionarios/${funcId}`, {
+    permissoes: JSON.stringify(permissoes)
+  });
+
+  if (result) {
+    const func = DB.funcionarios.find(f => f.id === funcId);
+    if (func) func.permissoes = JSON.stringify(permissoes);
+    closeModal('modalEditarPermissoes');
+    renderFuncionarios();
+    showToast('Permissões atualizadas!', 'success');
+  }
 }
 
 async function salvarNovasenha() {
