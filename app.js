@@ -122,10 +122,10 @@ async function saveDB() {
 // PERMISSIONS
 // ============================
 const ROLE_MODULES = {
-  admin:      ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia','metasvendas'],
-  gestor:     ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia','metasvendas'],
-  financeiro: ['dashboard','financeiro','tarefas','avisos','relatorios','inteligencia','metasvendas'],
-  marketing:  ['dashboard','marketing','crm','tarefas','avisos','metas','inteligencia','metasvendas'],
+  admin:      ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia','metasvendas','metasfuncionarios'],
+  gestor:     ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia','metasvendas','metasfuncionarios'],
+  financeiro: ['dashboard','financeiro','tarefas','avisos','relatorios','inteligencia','metasvendas','metasfuncionarios'],
+  marketing:  ['dashboard','marketing','crm','tarefas','avisos','metas','inteligencia','metasvendas','metasfuncionarios'],
   estoque:    ['dashboard','estoque','compras','tarefas','avisos','inteligencia'],
   funcionario:['dashboard','tarefas','avisos','metas','inteligencia'],
 };
@@ -1825,7 +1825,7 @@ function abrirEditarPermissoes(id, nome) {
 
   // Carregar permissões do funcionário
   const permissoes = func.permissoes ? JSON.parse(func.permissoes) : {};
-  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao', 'metasvendas'];
+  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao', 'metasvendas', 'metasfuncionarios'];
 
   modulos.forEach(mod => {
     const checkbox = document.getElementById(`editPerm${mod.charAt(0).toUpperCase() + mod.slice(1)}`);
@@ -1839,7 +1839,7 @@ async function salvarPermissoes() {
   const funcId = window.editPermFuncId;
   if (!funcId) return showToast('Erro: funcionário não identificado', 'error');
 
-  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao', 'metasvendas'];
+  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao', 'metasvendas', 'metasfuncionarios'];
   const permissoes = {};
 
   modulos.forEach(mod => {
