@@ -122,10 +122,10 @@ async function saveDB() {
 // PERMISSIONS
 // ============================
 const ROLE_MODULES = {
-  admin:      ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia'],
-  gestor:     ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia'],
-  financeiro: ['dashboard','financeiro','tarefas','avisos','relatorios','inteligencia'],
-  marketing:  ['dashboard','marketing','crm','tarefas','avisos','metas','inteligencia'],
+  admin:      ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia','metasvendas'],
+  gestor:     ['dashboard','financeiro','estoque','compras','funcionarios','tarefas','avisos','metas','marketing','crm','relatorios','inteligencia','metasvendas'],
+  financeiro: ['dashboard','financeiro','tarefas','avisos','relatorios','inteligencia','metasvendas'],
+  marketing:  ['dashboard','marketing','crm','tarefas','avisos','metas','inteligencia','metasvendas'],
   estoque:    ['dashboard','estoque','compras','tarefas','avisos','inteligencia'],
   funcionario:['dashboard','tarefas','avisos','metas','inteligencia'],
 };
