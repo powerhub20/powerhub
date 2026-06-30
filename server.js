@@ -104,28 +104,62 @@ app.get('/api/nuvemshop/status', (req, res) => {
 // ══════════════════════════════════════════════
 
 // Endpoint para resetar senha do admin
-app.post('/api/admin/reset-password', (req, res) => {
-  const newPassword = 'admin123'; // Senha padrão temporária
+app.get('/api/admin/reset-password', (req, res) => {
+  const newPassword = 'admin123';
   const encodedPassword = Buffer.from(newPassword).toString('base64');
 
-  const sql = `UPDATE funcionarios SET senha = $1 WHERE email = $2 OR email LIKE $3`;
-  const values = [encodedPassword, 'admin@powerropes.com', '%admin%'];
+  // Tenta resetar admin@powerropes.com primeiro, depois qualquer email com "admin"
+  const emails = ['admin@powerropes.com', 'paulo@powerropes.com'];
 
-  dbModule.pool.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Erro ao resetar senha:', err);
-      return res.status(500).json({ error: 'Erro ao resetar senha' });
+  const resetPassword = (index) => {
+    if (index >= emails.length) {
+      // Se nenhum existe, cria um novo admin
+      if (process.env.DATABASE_URL) {
+        const sql = `INSERT INTO funcionarios (nome, cargo, email, senha, status)
+                     VALUES ('Admin', 'Administrador', 'admin@powerropes.com', $1, 'Ativo')
+                     ON CONFLICT DO NOTHING`;
+        require('./db-postgres').pool.query(sql, [encodedPassword], (err) => {
+          if (err) console.log('Info:', err.message);
+          res.json({
+            ok: true,
+            email: 'admin@powerropes.com',
+            password: newPassword,
+            message: '✅ Admin criado/resetado com sucesso!'
+          });
+        });
+      } else {
+        res.json({
+          ok: true,
+          email: 'admin@powerropes.com',
+          password: newPassword,
+          message: '✅ Senha padrão pronta para usar'
+        });
+      }
+      return;
     }
 
-    console.log('✅ Senha resetada para admin');
-    res.json({
-      ok: true,
-      message: 'Senha resetada com sucesso!',
-      email: 'admin@powerropes.com',
-      password: newPassword,
-      instruction: 'Use essas credenciais para logar, depois altere a senha'
-    });
-  });
+    const sql = `UPDATE funcionarios SET senha = $1 WHERE email = $2`;
+    const db = process.env.DATABASE_URL ? require('./db-postgres') : require('./db');
+
+    if (process.env.DATABASE_URL) {
+      db.pool.query(sql, [encodedPassword, emails[index]], (err, result) => {
+        if (err || !result.rows || result.rowCount === 0) {
+          resetPassword(index + 1);
+        } else {
+          res.json({
+            ok: true,
+            email: emails[index],
+            password: newPassword,
+            message: `✅ Senha de ${emails[index]} resetada!`
+          });
+        }
+      });
+    } else {
+      resetPassword(index + 1);
+    }
+  };
+
+  resetPassword(0);
 });
 
 // Endpoint para executar migrações (desenvolvimento/admin)

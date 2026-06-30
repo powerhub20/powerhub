@@ -1800,7 +1800,7 @@ function abrirEditarPermissoes(id, nome) {
 
   // Carregar permissões do funcionário
   const permissoes = func.permissoes ? JSON.parse(func.permissoes) : {};
-  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao'];
+  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao', 'metasvendas'];
 
   modulos.forEach(mod => {
     const checkbox = document.getElementById(`editPerm${mod.charAt(0).toUpperCase() + mod.slice(1)}`);
@@ -1814,7 +1814,7 @@ async function salvarPermissoes() {
   const funcId = window.editPermFuncId;
   if (!funcId) return showToast('Erro: funcionário não identificado', 'error');
 
-  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao'];
+  const modulos = ['dashboard', 'vendas', 'financeiro', 'estoque', 'compras', 'funcionarios', 'tarefas', 'avisos', 'metas', 'marketing', 'crm', 'relatorios', 'inteligencia', 'nuvemshop', 'captacao', 'metasvendas'];
   const permissoes = {};
 
   modulos.forEach(mod => {
