@@ -94,6 +94,9 @@
       <a href="#" class="nav-item" data-module="crm" data-roles="admin,gestor,marketing" onclick="showModule('crm',this)">
         <i class="fas fa-handshake"></i><span>CRM</span>
       </a>
+      <a href="#" class="nav-item" data-module="metasvendas" onclick="showModule('metasvendas',this)">
+        <i class="fas fa-chart-bar"></i><span>Metas e Vendas</span>
+      </a>
       <div class="nav-section-label">Integrações</div>
       <a href="#" class="nav-item" data-module="nuvemshop" onclick="showModule('nuvemshop',this)">
         <i class="fas fa-store"></i><span>Nuvemshop</span>
@@ -690,6 +693,90 @@
                   <tbody id="tbodyRelatorioContatos"></tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== METAS E VENDAS ==================== -->
+      <section id="mod-metasvendas" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-chart-bar"></i> Metas e Vendas - Multi-Empresa</h2>
+          <div class="header-actions">
+            <button class="btn-primary btn-sm" onclick="abrirNovaVenda()"><i class="fas fa-plus"></i> Lançar Venda</button>
+            <button class="btn-outline btn-sm" onclick="exportarVendas()"><i class="fas fa-download"></i> Exportar</button>
+          </div>
+        </div>
+
+        <!-- ABAS -->
+        <div class="tabs-bar">
+          <button class="tab active" onclick="switchTab('metasvendas', 'dashboard', this)">📊 Dashboard</button>
+          <button class="tab" onclick="switchTab('metasvendas', 'powerropes', this)">🏢 Power Ropes</button>
+          <button class="tab" onclick="switchTab('metasvendas', 'powerprotection', this)">🛡️ Power Protection</button>
+          <button class="tab" onclick="switchTab('metasvendas', 'agoropes', this)">🌾 Agro Ropes</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="metasvendas-dashboard" class="tab-content active">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+            <div class="stat-card">
+              <div class="stat-label">Power Ropes</div>
+              <div class="stat-value" id="totalPowerRopes">R$ 0,00</div>
+              <div class="stat-meta" id="metaPowerRopes">0 lançamentos</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Power Protection</div>
+              <div class="stat-value" id="totalPowerProtection">R$ 0,00</div>
+              <div class="stat-meta" id="metaPowerProtection">0 lançamentos</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Agro Ropes</div>
+              <div class="stat-value" id="totalAgroRopes">R$ 0,00</div>
+              <div class="stat-meta" id="metaAgroRopes">0 lançamentos</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="chart-container">
+              <canvas id="chartVendasComparativo"></canvas>
+            </div>
+            <div class="chart-container">
+              <canvas id="chartDistribuicaoVendas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- POWER ROPES -->
+        <div id="metasvendas-powerropes" class="tab-content">
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Mês</th><th>Ano</th><th>Valor</th><th>Observações</th><th>Ações</th></tr></thead>
+                <tbody id="tbodyPowerRopes"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- POWER PROTECTION -->
+        <div id="metasvendas-powerprotection" class="tab-content">
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Mês</th><th>Ano</th><th>Valor</th><th>Observações</th><th>Ações</th></tr></thead>
+                <tbody id="tbodyPowerProtection"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- AGRO ROPES -->
+        <div id="metasvendas-agoropes" class="tab-content">
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Mês</th><th>Ano</th><th>Valor</th><th>Observações</th><th>Ações</th></tr></thead>
+                <tbody id="tbodyAgroRopes"></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -1316,6 +1403,55 @@
     <div class="modal-footer">
       <button class="btn-outline" onclick="closeModal('modalLeadDetalhe')">Fechar</button>
       <button class="btn-primary" id="btnSalvarLead" onclick="salvarLeadCRM()"><i class="fas fa-users"></i> Salvar no CRM</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lançar Venda -->
+<div id="modalNovaVenda" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>📊 Lançar Nova Venda</h3><button onclick="closeModal('modalNovaVenda')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Empresa *</label>
+          <select id="vendaEmpresa">
+            <option value="">Selecionar...</option>
+            <option value="Power Ropes">Power Ropes</option>
+            <option value="Power Protection">Power Protection</option>
+            <option value="Agro Ropes">Agro Ropes</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Mês *</label>
+          <select id="vendaMes">
+            <option value="">Selecionar...</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Ano *</label>
+          <input type="number" id="vendaAno" value="2026" min="2020" max="2099">
+        </div>
+        <div class="field-group"><label>Valor (R$) *</label>
+          <input type="number" id="vendaValor" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field-group" style="grid-column: 1/-1"><label>Observações</label>
+          <textarea id="vendaObservacoes" placeholder="Ex: Promoção Black Friday, Pedido corporativo..." style="min-height:80px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('modalNovaVenda')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarNovaVenda()">💾 Salvar Venda</button>
     </div>
   </div>
 </div>

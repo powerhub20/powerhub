@@ -158,6 +158,16 @@ async function initDatabase() {
       whatsapp_numero TEXT,
       endereco TEXT,
       data_contato TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS vendas_empresa (
+      id SERIAL PRIMARY KEY,
+      empresa TEXT NOT NULL,
+      mes INTEGER NOT NULL,
+      ano INTEGER NOT NULL,
+      valor REAL NOT NULL,
+      observacoes TEXT,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(empresa, mes, ano)
     )`
   ];
 

@@ -350,6 +350,18 @@ function showModule(name, el) {
         });
     },
     compras: renderCompras,
+    metasvendas: () => {
+      fetch('/api/vendas_empresa')
+        .then(r => r.json())
+        .then(data => {
+          DB.vendas = data || [];
+          renderMetasVendas();
+        })
+        .catch(e => {
+          console.error('❌ Erro ao carregar vendas:', e);
+          renderMetasVendas();
+        });
+    },
     relatorios: () => {},
   };
   if (renders[name]) renders[name]();
@@ -1898,6 +1910,201 @@ function exportPDF(tipo) {
 function exportExcel(tipo) {
   showToast('Gerando Excel... (funcionalidade simulada)', 'info');
   setTimeout(() => showToast('Excel pronto para download!', 'success'), 1500);
+}
+
+// ============================
+// METAS E VENDAS
+// ============================
+function renderMetasVendas() {
+  if (!DB.vendas) DB.vendas = [];
+
+  // Calcular totais
+  const empresas = ['Power Ropes', 'Power Protection', 'Agro Ropes'];
+  const totais = {};
+
+  empresas.forEach(emp => {
+    const vendas = DB.vendas.filter(v => v.empresa === emp);
+    const total = vendas.reduce((a, b) => a + (b.valor || 0), 0);
+    totais[emp] = { total, count: vendas.length };
+  });
+
+  // Atualizar cards
+  document.getElementById('totalPowerRopes').textContent = 'R$ ' + (totais['Power Ropes']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('totalPowerProtection').textContent = 'R$ ' + (totais['Power Protection']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('totalAgroRopes').textContent = 'R$ ' + (totais['Agro Ropes']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+  document.getElementById('metaPowerRopes').textContent = totais['Power Ropes']?.count + ' lançamento' + (totais['Power Ropes']?.count !== 1 ? 's' : '');
+  document.getElementById('metaPowerProtection').textContent = totais['Power Protection']?.count + ' lançamento' + (totais['Power Protection']?.count !== 1 ? 's' : '');
+  document.getElementById('metaAgroRopes').textContent = totais['Agro Ropes']?.count + ' lançamento' + (totais['Agro Ropes']?.count !== 1 ? 's' : '');
+
+  // Renderizar tabelas
+  renderizarEmpresa('Power Ropes', 'tbodyPowerRopes');
+  renderizarEmpresa('Power Protection', 'tbodyPowerProtection');
+  renderizarEmpresa('Agro Ropes', 'tbodyAgroRopes');
+
+  // Gráficos
+  renderGraficosVendas(totais);
+}
+
+function renderizarEmpresa(empresa, tbodyId) {
+  const vendas = DB.vendas.filter(v => v.empresa === empresa).sort((a,b) => b.ano - a.ano || b.mes - a.mes);
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+
+  const meses = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  tbody.innerHTML = vendas.map(v => `<tr>
+    <td><strong>${meses[v.mes]}</strong></td>
+    <td>${v.ano}</td>
+    <td><strong>R$ ${(v.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+    <td style="font-size:12px;color:var(--text-2)">${v.observacoes || '—'}</td>
+    <td><div class="actions-cell">
+      <button class="btn-icon" onclick="editarVenda(${v.id})" title="Editar"><i class="fas fa-edit"></i></button>
+      <button class="btn-icon del" onclick="deletarVenda(${v.id})" title="Deletar"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+
+  if (vendas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-2)">Nenhuma venda lançada ainda</td></tr>';
+  }
+}
+
+function abrirNovaVenda() {
+  document.getElementById('vendaEmpresa').value = '';
+  document.getElementById('vendaMes').value = '';
+  document.getElementById('vendaAno').value = new Date().getFullYear();
+  document.getElementById('vendaValor').value = '';
+  document.getElementById('vendaObservacoes').value = '';
+  openModal('modalNovaVenda');
+}
+
+async function salvarNovaVenda() {
+  const empresa = document.getElementById('vendaEmpresa').value;
+  const mes = parseInt(document.getElementById('vendaMes').value);
+  const ano = parseInt(document.getElementById('vendaAno').value);
+  const valor = parseFloat(document.getElementById('vendaValor').value);
+  const observacoes = document.getElementById('vendaObservacoes').value;
+
+  if (!empresa || !mes || !ano || !valor) {
+    return showToast('Preencha todos os campos obrigatórios!', 'warning');
+  }
+
+  const venda = { empresa, mes, ano, valor, observacoes };
+  const result = await apiRequest('POST', '/api/vendas_empresa', venda);
+
+  if (result && result.id) {
+    DB.vendas.push({ ...venda, id: result.id });
+    renderMetasVendas();
+    closeModal('modalNovaVenda');
+    showToast(`Venda de R$ ${valor.toLocaleString('pt-BR')} lançada com sucesso! 💰`, 'success');
+  } else {
+    showToast('Erro ao salvar venda', 'error');
+  }
+}
+
+async function deletarVenda(id) {
+  if (!confirm('Tem certeza que quer deletar esta venda?')) return;
+
+  const result = await apiRequest('DELETE', `/api/vendas_empresa/${id}`);
+  if (result && result.ok) {
+    DB.vendas = DB.vendas.filter(v => v.id !== id);
+    renderMetasVendas();
+    showToast('Venda removida!', 'success');
+  }
+}
+
+function editarVenda(id) {
+  const venda = DB.vendas.find(v => v.id === id);
+  if (!venda) return;
+
+  document.getElementById('vendaEmpresa').value = venda.empresa;
+  document.getElementById('vendaMes').value = venda.mes;
+  document.getElementById('vendaAno').value = venda.ano;
+  document.getElementById('vendaValor').value = venda.valor;
+  document.getElementById('vendaObservacoes').value = venda.observacoes || '';
+
+  window.vendaEmEdicao = id;
+  openModal('modalNovaVenda');
+}
+
+function renderGraficosVendas(totais) {
+  const empresas = ['Power Ropes', 'Power Protection', 'Agro Ropes'];
+  const valores = empresas.map(e => totais[e]?.total || 0);
+  const cores = ['#3498db', '#e74c3c', '#2ecc71'];
+
+  // Gráfico Comparativo
+  setTimeout(() => {
+    const ctx1 = document.getElementById('chartVendasComparativo');
+    if (!ctx1) return;
+    if (charts['vendasComparativo']) charts['vendasComparativo'].destroy();
+
+    charts['vendasComparativo'] = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: empresas,
+        datasets: [{
+          label: 'Total de Vendas (R$)',
+          data: valores,
+          backgroundColor: cores,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }, 100);
+
+  // Gráfico Distribuição
+  setTimeout(() => {
+    const ctx2 = document.getElementById('chartDistribuicaoVendas');
+    if (!ctx2) return;
+    if (charts['distribuicaoVendas']) charts['distribuicaoVendas'].destroy();
+
+    charts['distribuicaoVendas'] = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: empresas,
+        datasets: [{
+          data: valores,
+          backgroundColor: cores,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'right' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => 'R$ ' + ctx.parsed.toLocaleString('pt-BR')
+            }
+          }
+        }
+      }
+    });
+  }, 150);
+}
+
+function exportarVendas() {
+  if (!DB.vendas || DB.vendas.length === 0) {
+    return showToast('Nenhuma venda para exportar', 'warning');
+  }
+
+  const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const csv = 'Empresa,Mês,Ano,Valor,Observações\n' +
+    DB.vendas.map(v => `"${v.empresa}","${meses[v.mes]}",${v.ano},${v.valor},"${v.observacoes || ''}"`)
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vendas-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  showToast('Vendas exportadas com sucesso! 📊', 'success');
 }
 
 // ============================

@@ -152,6 +152,17 @@ function initDatabase() {
       endereco TEXT,
       data_contato DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS vendas_empresa (
+      id INTEGER PRIMARY KEY,
+      empresa TEXT NOT NULL,
+      mes INTEGER NOT NULL,
+      ano INTEGER NOT NULL,
+      valor REAL NOT NULL,
+      observacoes TEXT,
+      criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(empresa, mes, ano)
+    );
   `;
 
   schema.split(';').forEach(sql => {
