@@ -1941,6 +1941,14 @@ function renderMetasVendas() {
     totais[emp] = { total, count: vendas.length };
   });
 
+  // Calcular total geral
+  const totalGeral = Object.values(totais).reduce((acc, emp) => acc + emp.total, 0);
+  const totalLancamentos = Object.values(totais).reduce((acc, emp) => acc + emp.count, 0);
+
+  // Atualizar card de total geral
+  document.getElementById('totalGeralVendas').textContent = 'R$ ' + totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('metaTotalGeral').textContent = totalLancamentos + ' lançamento' + (totalLancamentos !== 1 ? 's' : '');
+
   // Atualizar cards
   document.getElementById('totalPowerRopes').textContent = 'R$ ' + (totais['Power Ropes']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
   document.getElementById('totalPowerProtection').textContent = 'R$ ' + (totais['Power Protection']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
