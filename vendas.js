@@ -608,9 +608,9 @@ function renderChart2026() {
   const canvas = document.getElementById('chart2026');
   if (!canvas) return;
 
-  const meses2026 = VENDAS_DATA.meses.slice(0,5);
-  const fat2026   = VENDAS_DATA.faturamento[2026].slice(0,5);
-  const fat2025m  = VENDAS_DATA.faturamento[2025].slice(0,5);
+  const meses2026 = VENDAS_DATA.meses.slice(0,6);
+  const fat2026   = VENDAS_DATA.faturamento[2026].slice(0,6);
+  const fat2025m  = VENDAS_DATA.faturamento[2025].slice(0,6);
 
   VC['2026chart'] = new Chart(canvas, {
     type: 'bar',
