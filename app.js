@@ -650,16 +650,17 @@ function renderDashboardCharts(period = 'mes') {
 
     const crescimentos = anos.map(ano => {
       const anoAnterior = ano - 1;
+      if (!VENDAS_DATA.faturamento[anoAnterior]) return 0;
 
-      // Determinar quantos meses considerar
-      const mesesParaConsiderar = (ano === anoAtual) ? mesAtual : 12;
+      // Sempre comparar Jan-Mai (5 meses)
+      const mesesParaConsiderar = 5;
 
-      // Calcular vendas do ano
+      // Calcular vendas Jan-Mai do ano
       const vendasAno = (VENDAS_DATA.faturamento[ano] || Array(12).fill(0))
         .slice(0, mesesParaConsiderar)
         .reduce((a,b) => a+b, 0);
 
-      // Calcular vendas do ano anterior (sempre considerar mesmo período)
+      // Calcular vendas Jan-Mai do ano anterior
       const vendasAnterior = (VENDAS_DATA.faturamento[anoAnterior] || Array(12).fill(0))
         .slice(0, mesesParaConsiderar)
         .reduce((a,b) => a+b, 0);
