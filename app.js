@@ -646,9 +646,9 @@ function renderDashboardCharts(period = 'mes') {
   if (ctxG && typeof VENDAS_DATA !== 'undefined') {
     const anoAtual = 2026;
     const mesAtual = 5; // Maio (0-indexed seria 4, mas aqui é 1-indexed)
-    const anos = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+    const anosParaMostrar = [2022, 2023, 2024, 2025, 2026];
 
-    const crescimentos = anos.map(ano => {
+    const crescimentos = anosParaMostrar.map(ano => {
       const anoAnterior = ano - 1;
       if (!VENDAS_DATA.faturamento[anoAnterior]) return 0;
 
@@ -672,7 +672,7 @@ function renderDashboardCharts(period = 'mes') {
     charts['growth'] = new Chart(ctxG, {
       type: 'bar',
       data: {
-        labels: ['2022','2023','2024','2025','2026*'],
+        labels: anosParaMostrar.map(a => a === 2026 ? '2026*' : String(a)),
         datasets: [{
           label: 'Crescimento %',
           data: crescimentos,
