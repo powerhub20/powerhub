@@ -284,11 +284,24 @@ function applyPermissions(role) {
   // Se o usuário tem permissões individuais, usar elas; senão, usar o padrão por role
   let allowed = [];
 
-  if (DB.user.permissoes && typeof DB.user.permissoes === 'object') {
+  if (DB.user.permissoes) {
+    let perms = DB.user.permissoes;
+    // Se é string JSON, fazer parse
+    if (typeof perms === 'string') {
+      try {
+        perms = JSON.parse(perms);
+      } catch (e) {
+        perms = {};
+      }
+    }
     // Usar permissões individuais
-    allowed = Object.keys(DB.user.permissoes).filter(key => DB.user.permissoes[key]);
-  } else {
-    // Fallback para ROLE_MODULES (compatibilidade com usuários antigos)
+    if (typeof perms === 'object') {
+      allowed = Object.keys(perms).filter(key => perms[key]);
+    }
+  }
+
+  // Fallback para ROLE_MODULES se não houver permissões individuais
+  if (allowed.length === 0) {
     allowed = ROLE_MODULES[role] || [];
   }
 
