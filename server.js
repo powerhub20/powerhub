@@ -103,6 +103,31 @@ app.get('/api/nuvemshop/status', (req, res) => {
 // MIGRAÇÕES
 // ══════════════════════════════════════════════
 
+// Endpoint para resetar senha do admin
+app.post('/api/admin/reset-password', (req, res) => {
+  const newPassword = 'admin123'; // Senha padrão temporária
+  const encodedPassword = Buffer.from(newPassword).toString('base64');
+
+  const sql = `UPDATE funcionarios SET senha = $1 WHERE email = $2 OR email LIKE $3`;
+  const values = [encodedPassword, 'admin@powerropes.com', '%admin%'];
+
+  dbModule.pool.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Erro ao resetar senha:', err);
+      return res.status(500).json({ error: 'Erro ao resetar senha' });
+    }
+
+    console.log('✅ Senha resetada para admin');
+    res.json({
+      ok: true,
+      message: 'Senha resetada com sucesso!',
+      email: 'admin@powerropes.com',
+      password: newPassword,
+      instruction: 'Use essas credenciais para logar, depois altere a senha'
+    });
+  });
+});
+
 // Endpoint para executar migrações (desenvolvimento/admin)
 app.post('/api/admin/migrate', (req, res) => {
   const migrations = [
