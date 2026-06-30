@@ -1967,6 +1967,55 @@ function renderMetasVendas() {
   renderGraficosVendas(totais);
 }
 
+// Filtrar Metas e Vendas
+function filterMetasVendas() {
+  if (!DB.vendas) DB.vendas = [];
+
+  const mes = document.getElementById('filtroMesVendas')?.value || '';
+  const ano = document.getElementById('filtroAnoVendas')?.value || '';
+  const valorMin = parseFloat(document.getElementById('filtroValorMinVendas')?.value || 0);
+  const valorMax = parseFloat(document.getElementById('filtroValorMaxVendas')?.value || Infinity);
+
+  // Filtrar vendas
+  let vendaFiltrada = DB.vendas.filter(v => {
+    if (mes && v.mes != mes) return false;
+    if (ano && v.ano != ano) return false;
+    if (v.valor < valorMin) return false;
+    if (v.valor > valorMax) return false;
+    return true;
+  });
+
+  // Calcular totais filtrados
+  const empresas = ['Power Ropes', 'Power Protection', 'Agro Ropes'];
+  const totais = {};
+
+  empresas.forEach(emp => {
+    const vendas = vendaFiltrada.filter(v => v.empresa === emp);
+    const total = vendas.reduce((a, b) => a + (b.valor || 0), 0);
+    totais[emp] = { total, count: vendas.length };
+  });
+
+  // Calcular total geral filtrado
+  const totalGeral = Object.values(totais).reduce((acc, emp) => acc + emp.total, 0);
+  const totalLancamentos = Object.values(totais).reduce((acc, emp) => acc + emp.count, 0);
+
+  // Atualizar displays
+  document.getElementById('totalGeralVendas').textContent = 'R$ ' + totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('metaTotalGeral').textContent = totalLancamentos + ' lançamento' + (totalLancamentos !== 1 ? 's' : '');
+
+  // Atualizar cards
+  document.getElementById('totalPowerRopes').textContent = 'R$ ' + (totais['Power Ropes']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('totalPowerProtection').textContent = 'R$ ' + (totais['Power Protection']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  document.getElementById('totalAgroRopes').textContent = 'R$ ' + (totais['Agro Ropes']?.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+  document.getElementById('metaPowerRopes').textContent = totais['Power Ropes']?.count + ' lançamento' + (totais['Power Ropes']?.count !== 1 ? 's' : '');
+  document.getElementById('metaPowerProtection').textContent = totais['Power Protection']?.count + ' lançamento' + (totais['Power Protection']?.count !== 1 ? 's' : '');
+  document.getElementById('metaAgroRopes').textContent = totais['Agro Ropes']?.count + ' lançamento' + (totais['Agro Ropes']?.count !== 1 ? 's' : '');
+
+  // Gráficos
+  renderGraficosVendas(totais);
+}
+
 function renderizarEmpresa(empresa, tbodyId) {
   const vendas = DB.vendas.filter(v => v.empresa === empresa).sort((a,b) => b.ano - a.ano || b.mes - a.mes);
   const tbody = document.getElementById(tbodyId);
