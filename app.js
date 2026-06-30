@@ -375,6 +375,18 @@ function showModule(name, el) {
           renderMetasVendas();
         });
     },
+    metasfuncionarios: () => {
+      fetch('/api/metas_funcionarios')
+        .then(r => r.json())
+        .then(data => {
+          DB.metasFuncionarios = data || [];
+          renderMetasFuncionarios();
+        })
+        .catch(e => {
+          console.error('❌ Erro ao carregar metas:', e);
+          renderMetasFuncionarios();
+        });
+    },
     relatorios: () => {},
   };
   if (renders[name]) renders[name]();
@@ -2156,6 +2168,160 @@ function renderGraficosVendas(totais) {
       }
     });
   }, 150);
+}
+
+// ============================
+// METAS FUNCIONÁRIOS
+// ============================
+function renderMetasFuncionarios() {
+  if (!DB.metasFuncionarios) DB.metasFuncionarios = [];
+  if (!DB.funcionarios) DB.funcionarios = [];
+
+  // Carregar funcionários se necessário
+  if (DB.funcionarios.length === 0) {
+    fetch('/api/funcionarios').then(r => r.json()).then(data => {
+      DB.funcionarios = data || [];
+      renderMetasFuncionarios();
+    });
+    return;
+  }
+
+  // Calcular totais
+  const totalMetas = DB.metasFuncionarios.length;
+  const funcionariosComMetas = new Set(DB.metasFuncionarios.map(m => m.funcionario_id)).size;
+
+  document.getElementById('totalMetasFunc').textContent = totalMetas;
+  document.getElementById('metaTotalFunc').textContent = funcionariosComMetas + ' funcionário' + (funcionariosComMetas !== 1 ? 's' : '') + ' com metas';
+
+  // Criar abas por funcionário
+  const tabsContainer = document.getElementById('tabsFuncionarios');
+  const contentContainer = document.getElementById('funcionariosMetasContent');
+
+  if (!tabsContainer || !contentContainer) return;
+
+  tabsContainer.innerHTML = '';
+  contentContainer.innerHTML = '';
+
+  DB.funcionarios.forEach((func, idx) => {
+    const tab = document.createElement('button');
+    tab.className = idx === 0 ? 'tab active' : 'tab';
+    tab.textContent = func.nome;
+    tab.onclick = () => switchTab('metasfuncionarios', `func-${func.id}`, tab);
+    tabsContainer.appendChild(tab);
+
+    const metasFunc = DB.metasFuncionarios.filter(m => m.funcionario_id === func.id);
+    const totalAlcancado = metasFunc.reduce((a, b) => a + (b.valor_alcancado || 0), 0);
+    const totalMeta = metasFunc.reduce((a, b) => a + (b.valor || 0), 0);
+
+    const content = document.createElement('div');
+    content.id = `metasfuncionarios-func-${func.id}`;
+    content.className = 'tab-content' + (idx === 0 ? ' active' : '');
+    content.innerHTML = `
+      <div style="margin-bottom:20px;padding:16px;background:rgba(100,150,200,0.1);border-radius:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div><span style="color:var(--text-2);font-size:12px">Meta Total</span><div style="font-size:20px;font-weight:bold">R$ ${totalMeta.toLocaleString('pt-BR')}</div></div>
+          <div><span style="color:var(--text-2);font-size:12px">Alcançado</span><div style="font-size:20px;font-weight:bold;color:#2ecc71">R$ ${totalAlcancado.toLocaleString('pt-BR')}</div></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Tipo</th><th>Meta</th><th>Alcançado</th><th>Mês/Ano</th><th>Progresso</th><th>Ações</th></tr></thead>
+            <tbody id="tbodyMetasFunc${func.id}"></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    contentContainer.appendChild(content);
+
+    // Preencher tabela
+    const tbody = document.getElementById(`tbodyMetasFunc${func.id}`);
+    const meses = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    metasFunc.forEach(meta => {
+      const progresso = meta.valor > 0 ? Math.round((meta.valor_alcancado / meta.valor) * 100) : 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${meta.tipo}</td>
+        <td>R$ ${meta.valor.toLocaleString('pt-BR')}</td>
+        <td>R$ ${meta.valor_alcancado.toLocaleString('pt-BR')}</td>
+        <td>${meses[meta.mes]}/${meta.ano}</td>
+        <td><div style="width:60px;height:6px;background:#ddd;border-radius:3px;overflow:hidden"><div style="height:100%;width:${progresso}%;background:${progresso >= 100 ? '#2ecc71' : '#3498db'}"></div></div> ${progresso}%</td>
+        <td><button class="btn-sm btn-outline" onclick="editarMetaFunc(${meta.id})">Editar</button> <button class="btn-sm" style="background:#e74c3c" onclick="deletarMetaFunc(${meta.id})">❌</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function abrirNovaMetaFunc() {
+  document.getElementById('metaFuncFuncionario').innerHTML = '<option value="">Selecionar...</option>' +
+    (DB.funcionarios || []).map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
+
+  document.getElementById('metaFuncTipo').value = '';
+  document.getElementById('metaFuncValor').value = '';
+  document.getElementById('metaFuncAlcancado').value = '';
+  document.getElementById('metaFuncMes').value = new Date().getMonth() + 1;
+  document.getElementById('metaFuncAno').value = new Date().getFullYear();
+  document.getElementById('metaFuncObservacoes').value = '';
+
+  window.metaFuncEmEdicao = null;
+  openModal('modalNovaMetaFunc');
+}
+
+async function salvarNovaMetaFunc() {
+  const funcId = parseInt(document.getElementById('metaFuncFuncionario').value);
+  const tipo = document.getElementById('metaFuncTipo').value;
+  const valor = parseFloat(document.getElementById('metaFuncValor').value);
+  const alcancado = parseFloat(document.getElementById('metaFuncAlcancado').value) || 0;
+  const mes = parseInt(document.getElementById('metaFuncMes').value);
+  const ano = parseInt(document.getElementById('metaFuncAno').value);
+  const observacoes = document.getElementById('metaFuncObservacoes').value;
+
+  if (!funcId || !tipo || !valor || !mes || !ano) {
+    return showToast('Preencha todos os campos obrigatórios!', 'warning');
+  }
+
+  const funcionario = DB.funcionarios.find(f => f.id === funcId);
+  const meta = { funcionario_id: funcId, funcionario_nome: funcionario?.nome || '', tipo, valor, valor_alcancado: alcancado, mes, ano, observacoes };
+
+  const result = await apiRequest('POST', '/api/metas_funcionarios', meta);
+
+  if (result && result.id) {
+    DB.metasFuncionarios.push({ ...meta, id: result.id });
+    renderMetasFuncionarios();
+    closeModal('modalNovaMetaFunc');
+    showToast(`Meta de ${tipo} criada com sucesso! 🎯`, 'success');
+  } else {
+    showToast('Erro ao salvar meta', 'error');
+  }
+}
+
+async function deletarMetaFunc(id) {
+  if (!confirm('Tem certeza que quer deletar esta meta?')) return;
+
+  const result = await apiRequest('DELETE', `/api/metas_funcionarios/${id}`);
+  if (result && result.ok) {
+    DB.metasFuncionarios = DB.metasFuncionarios.filter(m => m.id !== id);
+    renderMetasFuncionarios();
+    showToast('Meta removida!', 'success');
+  }
+}
+
+function editarMetaFunc(id) {
+  const meta = DB.metasFuncionarios.find(m => m.id === id);
+  if (!meta) return;
+
+  document.getElementById('metaFuncFuncionario').value = meta.funcionario_id;
+  document.getElementById('metaFuncTipo').value = meta.tipo;
+  document.getElementById('metaFuncValor').value = meta.valor;
+  document.getElementById('metaFuncAlcancado').value = meta.valor_alcancado;
+  document.getElementById('metaFuncMes').value = meta.mes;
+  document.getElementById('metaFuncAno').value = meta.ano;
+  document.getElementById('metaFuncObservacoes').value = meta.observacoes || '';
+
+  window.metaFuncEmEdicao = id;
+  openModal('modalNovaMetaFunc');
 }
 
 function exportarVendas() {

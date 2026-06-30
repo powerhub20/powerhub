@@ -588,7 +588,7 @@ app.post('/api/login', (req, res) => {
 // DATABASE API — CRUD para todos os módulos
 // ══════════════════════════════════════════════
 
-const TABLES = ['tarefas', 'produtos', 'financeiro', 'avisos', 'metas', 'funcionarios', 'campanhas', 'clientes', 'fornecedores', 'compras', 'contatos_captacao', 'vendas_empresa'];
+const TABLES = ['tarefas', 'produtos', 'financeiro', 'avisos', 'metas', 'funcionarios', 'campanhas', 'clientes', 'fornecedores', 'compras', 'contatos_captacao', 'vendas_empresa', 'metas_funcionarios'];
 
 // DEBUG: Test insert
 app.post('/api/debug/test-insert', (req, res) => {

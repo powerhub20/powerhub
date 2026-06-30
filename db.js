@@ -163,6 +163,20 @@ function initDatabase() {
       criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(empresa, mes, ano)
     );
+
+    CREATE TABLE IF NOT EXISTS metas_funcionarios (
+      id INTEGER PRIMARY KEY,
+      funcionario_id INTEGER NOT NULL,
+      funcionario_nome TEXT NOT NULL,
+      tipo TEXT NOT NULL,
+      valor REAL NOT NULL,
+      valor_alcancado REAL DEFAULT 0,
+      mes INTEGER NOT NULL,
+      ano INTEGER NOT NULL,
+      observacoes TEXT,
+      criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(funcionario_id, tipo, mes, ano)
+    );
   `;
 
   schema.split(';').forEach(sql => {

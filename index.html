@@ -67,6 +67,9 @@
       <a href="#" class="nav-item" data-module="metasvendas" onclick="showModule('metasvendas',this)">
         <i class="fas fa-chart-bar"></i><span>Metas e Vendas</span>
       </a>
+      <a href="#" class="nav-item" data-module="metasfuncionarios" onclick="showModule('metasfuncionarios',this)">
+        <i class="fas fa-users-chart"></i><span>Metas Funcionários</span>
+      </a>
       <a href="#" class="nav-item" data-module="financeiro" data-roles="admin,gestor,financeiro" onclick="showModule('financeiro',this)">
         <i class="fas fa-dollar-sign"></i><span>Financeiro</span>
       </a>
@@ -831,6 +834,38 @@
         </div>
       </section>
 
+      <!-- ==================== METAS FUNCIONÁRIOS ==================== -->
+      <section id="mod-metasfuncionarios" class="module">
+        <div class="module-header">
+          <h2><i class="fas fa-users-chart"></i> Metas Funcionários</h2>
+          <button class="btn-primary" onclick="abrirNovaMetaFunc()"><i class="fas fa-plus"></i> Nova Meta</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="metasfuncionarios-dashboard" class="tab-content active" style="margin-bottom:20px">
+          <div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:24px">
+            <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:12px; padding:32px; box-shadow:0 10px 40px rgba(102,126,234,0.3)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font-size:14px;color:#fff;opacity:0.85;margin-bottom:8px;font-weight:600">👥 TOTAL DE METAS</div>
+                  <div id="totalMetasFunc" style="color:#fff;font-size:42px;font-weight:bold">0</div>
+                  <div id="metaTotalFunc" style="color:#fff;opacity:0.85;margin-top:12px;font-size:14px">0 funcionários com metas</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:48px">📊</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABAS POR FUNCIONÁRIO -->
+        <div class="tabs-bar" id="tabsFuncionarios" style="margin-bottom:20px"></div>
+
+        <!-- CONTEÚDO DAS ABAS -->
+        <div id="funcionariosMetasContent"></div>
+      </section>
+
       <!-- ==================== NUVEMSHOP ==================== -->
       <section id="mod-nuvemshop" class="module">
         <div class="module-header">
@@ -1504,6 +1539,65 @@
     <div class="modal-footer">
       <button class="btn-outline" onclick="closeModal('modalNovaVenda')">Cancelar</button>
       <button class="btn-primary" onclick="salvarNovaVenda()">💾 Salvar Venda</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Meta Funcionário -->
+<div id="modalNovaMetaFunc" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3>📊 Nova Meta Funcionário</h3><button onclick="closeModal('modalNovaMetaFunc')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field-group"><label>Funcionário *</label>
+          <select id="metaFuncFuncionario">
+            <option value="">Selecionar...</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Tipo de Meta *</label>
+          <select id="metaFuncTipo">
+            <option value="">Selecionar...</option>
+            <option value="Vendas">Vendas (R$)</option>
+            <option value="Tarefas">Tarefas Completadas</option>
+            <option value="Clientes">Novos Clientes</option>
+            <option value="Ligações">Ligações/Contatos</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Meta (Valor) *</label>
+          <input type="number" id="metaFuncValor" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field-group"><label>Valor Alcançado</label>
+          <input type="number" id="metaFuncAlcancado" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field-group"><label>Mês *</label>
+          <select id="metaFuncMes">
+            <option value="">Selecionar...</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="field-group"><label>Ano *</label>
+          <input type="number" id="metaFuncAno" value="2026" min="2020" max="2099">
+        </div>
+        <div class="field-group" style="grid-column: 1/-1"><label>Observações</label>
+          <textarea id="metaFuncObservacoes" placeholder="Notas sobre esta meta..." style="min-height:60px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('modalNovaMetaFunc')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarNovaMetaFunc()">💾 Salvar Meta</button>
     </div>
   </div>
 </div>
