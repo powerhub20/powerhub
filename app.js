@@ -652,15 +652,15 @@ function renderDashboardCharts(period = 'mes') {
       const anoAnterior = ano - 1;
       if (!VENDAS_DATA.faturamento[anoAnterior]) return 0;
 
-      // Sempre comparar Jan-Mai (5 meses)
-      const mesesParaConsiderar = 5;
+      // Para 2026 (ano atual), comparar até o mês atual. Para outros anos, comparar 12 meses
+      const mesesParaConsiderar = (ano === anoAtual) ? mesAtual : 12;
 
-      // Calcular vendas Jan-Mai do ano
+      // Calcular vendas do ano (Jan-Dez ou Jan-mês atual para 2026)
       const vendasAno = (VENDAS_DATA.faturamento[ano] || Array(12).fill(0))
         .slice(0, mesesParaConsiderar)
         .reduce((a,b) => a+b, 0);
 
-      // Calcular vendas Jan-Mai do ano anterior
+      // Calcular vendas do ano anterior (sempre mesmo período)
       const vendasAnterior = (VENDAS_DATA.faturamento[anoAnterior] || Array(12).fill(0))
         .slice(0, mesesParaConsiderar)
         .reduce((a,b) => a+b, 0);
